@@ -18,6 +18,8 @@ type RootStackParamList = {
     ClassBooking: undefined;
     Routines: undefined;
     Nutrition: undefined;
+    ChatList: undefined;
+    Chat: { chatId: string; chatName?: string };
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -173,6 +175,23 @@ export default function HomeScreen() {
                             >
                                 Ver plan
                             </Button>
+                        </Card.Actions>
+                    </Card>
+                </View>
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: 'black' }]}>Mensajes</Text>
+                    <Card style={styles.nutritionCard}>
+                        <Card.Content>
+                            <Text variant="titleMedium" style={{ color: 'black' }}>Chats</Text>
+                            <Text variant="bodySmall" style={{ color: 'black' }}>Comunícate con otros usuarios</Text>
+                        </Card.Content>
+                        <Card.Actions>
+                            <Button
+                                mode="contained-tonal"
+                                style={{ backgroundColor: '#f5f5dc' }}
+                                textColor="black"
+                                onPress={() => navigation.navigate('ChatList')}
+                            >Abrir chats</Button>
                         </Card.Actions>
                     </Card>
                 </View>

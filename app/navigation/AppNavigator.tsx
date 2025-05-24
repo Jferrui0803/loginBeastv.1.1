@@ -16,9 +16,30 @@ import RoutinesScreen from '../src/screens/RoutinesScreen';
 import WorkoutDetailScreen from '../src/screens/WorkoutDetailScreen';
 import PersonalizedTrainingScreen from '../src/screens/PersonalizedTrainingScreen';
 import NutritionScreen from '../src/screens/NutritionScreen';
+import ChatListScreen from '../src/screens/ChatListScreen';
+import ChatScreen from '../src/screens/ChatScreen';
+import NewChatScreen from '../src/screens/NewChatScreen';
+import type { RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-
-const Stack = createNativeStackNavigator();
+// Definir los parámetros de navegación del stack principal
+type MainStackParamList = {
+  Login: undefined;
+  HomeScreen: undefined;
+  ChatList: undefined;
+  NewChat: undefined;
+  Chat: { chatId: string; chatName?: string };
+  Nutrition: undefined;
+  PersonalizedTraining: undefined;
+  ClassBooking: undefined;
+  GymMap: undefined;
+  Profile: undefined;
+  Routines: undefined;
+  WorkoutDetail: undefined;
+};
+ 
+// Crear stack tipado
+const Stack = createNativeStackNavigator<MainStackParamList>();
 
 // Change from named export to default export
 const AppNavigator = () => {
@@ -40,6 +61,16 @@ const AppNavigator = () => {
           ),
           headerShown: true,
         }}
+      />
+      <Stack.Screen name="ChatList" component={ChatListScreen} options={{ headerShown: true, title: 'Chats' }} />
+      <Stack.Screen name="NewChat" component={NewChatScreen} options={{ headerShown: true, title: 'Nuevo Chat' }} />
+      <Stack.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={({ route }: { route: RouteProp<MainStackParamList, 'Chat'> }) => ({
+          headerShown: true,
+          title: route.params.chatName ?? 'Chat'
+        })}
       />
       <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ headerShown: true, title: 'Nutrición' }} />
       <Stack.Screen name="PersonalizedTraining" component={PersonalizedTrainingScreen} options={{ headerShown: true, title: 'Entrenamiento Personalizado' }} />
