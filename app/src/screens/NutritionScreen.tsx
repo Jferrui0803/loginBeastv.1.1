@@ -10,7 +10,7 @@ interface Message {
   sender: 'user' | 'bot';
 }
 
-export default function PersonalizedTrainingScreen() {
+export default function NutritionScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
 
@@ -46,7 +46,7 @@ export default function PersonalizedTrainingScreen() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Escribe tu consulta de entrenamiento..."
+          placeholder="Escribe tu pregunta..."
           value={inputText}
           onChangeText={setInputText}
         />

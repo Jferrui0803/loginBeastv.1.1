@@ -15,6 +15,7 @@ import ProgressScreen from '../src/screens/ProgressScreen';
 import RoutinesScreen from '../src/screens/RoutinesScreen';
 import WorkoutDetailScreen from '../src/screens/WorkoutDetailScreen';
 import PersonalizedTrainingScreen from '../src/screens/PersonalizedTrainingScreen';
+import NutritionScreen from '../src/screens/NutritionScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -40,6 +41,7 @@ const AppNavigator = () => {
           headerShown: true,
         }}
       />
+      <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ headerShown: true, title: 'Nutrición' }} />
       <Stack.Screen name="PersonalizedTraining" component={PersonalizedTrainingScreen} options={{ headerShown: true, title: 'Entrenamiento Personalizado' }} />
       <Stack.Screen name="ClassBooking" component={ClassBookingScreen} />
       <Stack.Screen name="GymMap" component={GymMapScreen} />

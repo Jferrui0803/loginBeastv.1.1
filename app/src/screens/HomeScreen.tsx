@@ -17,6 +17,7 @@ type RootStackParamList = {
     PersonalizedTraining: undefined;
     ClassBooking: undefined;
     Routines: undefined;
+    Nutrition: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -141,10 +142,12 @@ export default function HomeScreen() {
                             </Text>
                         </Card.Content>
                         <Card.Actions>
-                            <Button 
-                                mode="contained-tonal" 
+                            <Button
+                                mode="contained-tonal"
                                 style={{ backgroundColor: '#f5f5dc' }}
-                                textColor="black">
+                                textColor="black"
+                                onPress={() => navigation.navigate('Nutrition')}
+                            >
                                 Ver plan
                             </Button>
                         </Card.Actions>
@@ -162,11 +165,12 @@ export default function HomeScreen() {
                             </Text>
                         </Card.Content>
                         <Card.Actions>
-                            <Button 
-                                mode="contained-tonal" 
+                            <Button
+                                mode="contained-tonal"
                                 style={{ backgroundColor: '#f5f5dc' }}
                                 textColor="black"
-                                onPress={() => navigation.navigate('PersonalizedTraining')}>
+                                onPress={() => navigation.navigate('PersonalizedTraining')}
+                            >
                                 Ver plan
                             </Button>
                         </Card.Actions>

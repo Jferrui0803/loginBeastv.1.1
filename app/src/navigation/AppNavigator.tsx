@@ -12,7 +12,7 @@ import WorkoutDetailScreen from '../screens/WorkoutDetailScreen';
 import ClassBookingScreen from '../screens/ClassBookingScreen';
 import ProgressScreen from '../screens/ProgressScreen';
 import RoutinesScreen from '../screens/RoutinesScreen';
-
+import NutritionScreen from '../screens/NutritionScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +79,7 @@ export default function AppNavigator() {
     headerShown: true
   }}
 />
+<Stack.Screen name="Nutrition" component={NutritionScreen} />
 </Stack.Navigator>
     </NavigationContainer>
   );
