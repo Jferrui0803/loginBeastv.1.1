@@ -19,6 +19,8 @@ import NutritionScreen from '../src/screens/NutritionScreen';
 import ChatListScreen from '../src/screens/ChatListScreen';
 import ChatScreen from '../src/screens/ChatScreen';
 import NewChatScreen from '../src/screens/NewChatScreen';
+import IAChatListScreen from '../src/screens/IAChatListScreen';
+import IAChatDetailScreen from '../src/screens/IAChatDetailScreen';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -36,6 +38,8 @@ type MainStackParamList = {
   Profile: undefined;
   Routines: undefined;
   WorkoutDetail: undefined;
+  IAChatList: { chatType: 'nutrition' | 'training' };
+  IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
 };
  
 // Crear stack tipado
@@ -79,6 +83,9 @@ const AppNavigator = () => {
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Routines" component={RoutinesScreen} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+      {/* IA Chat Screens */}
+      <Stack.Screen name="IAChatList" component={IAChatListScreen} options={{ headerShown: true, title: 'Chats IA' }} />
+      <Stack.Screen name="IAChatDetail" component={IAChatDetailScreen} options={({ route }) => ({ headerShown: true, title: route.params.chatTitle })} />
     </>
   ) : (
     <Stack.Screen name="Login" component={Login} />

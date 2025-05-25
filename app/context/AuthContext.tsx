@@ -1,3 +1,4 @@
+import React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
@@ -11,7 +12,7 @@ interface AuthProps {
 }
 
 const TOKEN_KEY = 'userToken';
-export const API_URL = 'http://192.168.1.151:3000';
+export const API_URL = 'http://192.168.0.14:3000';
 const AuthContext = createContext<AuthProps>({});
 
 export const useAuth = () => {

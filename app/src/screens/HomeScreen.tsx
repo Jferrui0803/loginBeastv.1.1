@@ -20,6 +20,8 @@ type RootStackParamList = {
     Nutrition: undefined;
     ChatList: undefined;
     Chat: { chatId: string; chatName?: string };
+    IAChatList: { chatType: 'nutrition' | 'training' };
+    IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -148,7 +150,7 @@ export default function HomeScreen() {
                                 mode="contained-tonal"
                                 style={{ backgroundColor: '#f5f5dc' }}
                                 textColor="black"
-                                onPress={() => navigation.navigate('Nutrition')}
+                                onPress={() => navigation.navigate('IAChatList', { chatType: 'nutrition' })}
                             >
                                 Ver plan
                             </Button>
@@ -171,7 +173,7 @@ export default function HomeScreen() {
                                 mode="contained-tonal"
                                 style={{ backgroundColor: '#f5f5dc' }}
                                 textColor="black"
-                                onPress={() => navigation.navigate('PersonalizedTraining')}
+                                onPress={() => navigation.navigate('IAChatList', { chatType: 'training' })}
                             >
                                 Ver plan
                             </Button>
