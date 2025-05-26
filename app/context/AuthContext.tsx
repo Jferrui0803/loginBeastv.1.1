@@ -2,10 +2,11 @@ import React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import { jwtDecode } from 'jwt-decode';
 
 
 interface AuthProps {
-    authState?: { token: string | null, authenticated: boolean | null };
+    authState?: { token: string | null, authenticated: boolean | null, userId?: string | null };
     onRegister?: (email: string, password: string) => Promise<any>;
     onLogin?: (email: string, password: string) => Promise<any>;
     onLogout?: () => Promise<any>;
@@ -23,10 +24,12 @@ export const AuthProvider = ({ children }: any) => {
 
     const [authState, setAuthState] = useState<{
         token: string | null,
-        authenticated: boolean | null
+        authenticated: boolean | null,
+        userId: string | null
     }>({
         token: null,
-        authenticated: null
+        authenticated: null,
+        userId: null
     });
 
     useEffect(() => {
@@ -36,13 +39,19 @@ export const AuthProvider = ({ children }: any) => {
 
             if (token) {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                let userId = null;
+                try {
+                    const decoded: any = jwtDecode(token);
+                    userId = decoded?.id || decoded?.userId || null;
+                } catch (e) {
+                    userId = null;
+                }
                 setAuthState({
                     token: token,
-                    authenticated: true
+                    authenticated: true,
+                    userId: userId
                 });
-
             }
-
         }
         loadToken();
     }, [])
@@ -66,11 +75,12 @@ export const AuthProvider = ({ children }: any) => {
                 email,
                 password
             });
-            const { token } = result.data;
+            const { token, user } = result.data;
 
             setAuthState({
                 token: result.data.token,
-                authenticated: true
+                authenticated: true,
+                userId: user?.id || null
             });
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${result.data.token}`;
@@ -90,7 +100,8 @@ export const AuthProvider = ({ children }: any) => {
 
         setAuthState({
             token: null,
-            authenticated: false
+            authenticated: false,
+            userId: null
         });
     };
 

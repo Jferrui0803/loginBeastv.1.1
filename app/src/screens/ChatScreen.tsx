@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import { API_URL } from '../../context/AuthContext';
 import { useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
+import { useAuth } from '../../context/AuthContext';
 
 // Parametros de ruta para el chat
 type RootStackParamList = {
@@ -27,6 +28,8 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const socketRef = useRef<any>(null);
+  const { authState } = useAuth();
+  const userId = authState?.userId;
 
   // Carga mensajes previos
   useEffect(() => {
@@ -48,12 +51,22 @@ export default function ChatScreen() {
     };
   }, [chatId]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
     const content = inputText;
-    // Emite mensaje por WebSocket
-    socketRef.current.emit('send-message', { chatId, content });
     setInputText('');
+    try {
+      // Guardar mensaje en el backend
+      const res = await axios.post(`${API_URL}/api/chats/${chatId}/messages`, { content });
+      const newMsg = res.data;
+      setMessages(prev => [...prev, newMsg]);
+      // Emitir por WebSocket (opcional, si el backend no lo hace automáticamente)
+      if (socketRef.current) {
+        socketRef.current.emit('send-message', { chatId, content });
+      }
+    } catch (e) {
+      // Manejo de error opcional
+    }
   };
   return (
     <KeyboardAvoidingView 
@@ -65,8 +78,11 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text>{item.content}</Text>
+          <View style={[
+            styles.messageBubble,
+            item.senderId === userId ? styles.messageSent : styles.messageReceived
+          ]}>
+            <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
           </View>
         )}
         contentContainerStyle={styles.messagesContainer}
@@ -90,7 +106,39 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5dc' },
   messagesList: { flex: 1 },
   messagesContainer: { padding: 16, flexGrow: 1 },
-  messageBubble: { padding: 12, backgroundColor: '#fff', borderRadius: 8, marginVertical: 4, maxWidth: '80%' },
+  messageBubble: {
+    padding: 12,
+    borderRadius: 18,
+    marginVertical: 6,
+    maxWidth: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  messageSent: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#ffa500',
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 18,
+    borderTopLeftRadius: 18,
+    borderBottomLeftRadius: 18,
+    marginLeft: 40,
+  },
+  messageReceived: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 4,
+    borderBottomLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderBottomRightRadius: 18,
+    marginRight: 40,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  textSent: { color: '#fff', fontWeight: 'bold' },
+  textReceived: { color: '#333' },
   inputContainer: { 
     flexDirection: 'row', 
     alignItems: 'flex-end', 
