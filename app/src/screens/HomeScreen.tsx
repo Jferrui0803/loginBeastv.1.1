@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ScrollView, Image, RefreshControl } from 'react-native';
 import { Text, Card, Button, Surface, FAB, Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 
 import HomeClassCard from '../components/HomeClassCard';
 
@@ -28,6 +29,18 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function HomeScreen() {
     const navigation = useNavigation<NavigationProp>();
+    const [refreshing, setRefreshing] = useState(false);
+    const onRefresh = async () => {
+        setRefreshing(true);
+        // Aquí puedes recargar datos desde API o AsyncStorage si lo necesitas
+        setTimeout(() => setRefreshing(false), 1000); // Simulación de recarga
+    };
+    // Detectar scroll al tope superior para recargar
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
+            onRefresh();
+        }
+    };
 
     const renderWorkoutCard = () => (
         <Card style={styles.card}>
@@ -129,7 +142,13 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#ffa500"]} />
+                }
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
                 {renderWorkoutCard()}
                 {renderQuickActions()}
                 {renderStats()}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder } from 'react-native';
+import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { List, FAB, ActivityIndicator, Text, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 interface IAChat {
   id: string;
   title: string;
+  description?: string;
   messages: { id: string; text: string; sender: 'user' | 'bot' }[];
 }
 
@@ -110,8 +111,12 @@ const SwipeableChatItem = ({
         {...panResponder.panHandlers}
       >
         <List.Item
-          title={item.title}
-          description={item.messages.length ? item.messages[item.messages.length - 1].text : 'Sin mensajes'}
+          title={
+            item.title && !item.title.toLowerCase().includes('nuevo chat')
+              ? item.title
+              : (item.description || (item.messages.length ? item.messages[0].text : 'Chat IA'))
+          }
+          description={item.description ? item.description : (item.messages.length ? item.messages[item.messages.length - 1].text : 'Sin mensajes')}
           onPress={onPress}
           left={props => <List.Icon {...props} icon="chat" />}
           style={styles.listItem}
@@ -125,21 +130,39 @@ const IAChatListScreen = ({ route }: IAChatListScreenProps) => {
   const chatType: IAChatType = route?.params?.chatType || 'nutrition';
   const [chats, setChats] = useState<IAChat[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProp>();
 
+  const loadChats = async () => {
+    setLoading(true);
+    const storedChats = await AsyncStorage.getItem(getStorageKey(chatType));
+    if (storedChats) {
+      setChats(JSON.parse(storedChats));
+    } else {
+      setChats([]);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const loadChats = async () => {
-      setLoading(true);
-      const storedChats = await AsyncStorage.getItem(getStorageKey(chatType));
-      if (storedChats) {
-        setChats(JSON.parse(storedChats));
-      } else {
-        setChats([]);
-      }
-      setLoading(false);
-    };
     loadChats();
   }, [chatType]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Recarga real
+    await loadChats();
+    // Mantener el spinner visible al menos 1.5 segundos
+    setTimeout(() => setRefreshing(false), 1500);
+  };
+
+  // Detectar scroll al tope superior para recargar
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
+      onRefresh();
+    }
+  };
+
   const createNewChat = async () => {
     const newChat: IAChat = {
       id: Date.now().toString(),
@@ -181,7 +204,16 @@ const IAChatListScreen = ({ route }: IAChatListScreenProps) => {
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListEmptyComponent={<Text style={styles.empty}>No tienes chats aún.</Text>}
+
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       />
+      {refreshing && (
+        <View style={styles.refreshingOverlay} pointerEvents="none">
+          <ActivityIndicator size="large" color="#ffa500" />
+          <Text style={styles.refreshingText}>Recargando...</Text>
+        </View>
+      )}
       <FAB
         icon="plus"
         style={styles.fab}
@@ -230,5 +262,28 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
+  },
+  refreshingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5dc',
+  },
+  refreshingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(245,245,220,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  refreshingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: '#ffa500',
+    fontWeight: 'bold',
   },
 });

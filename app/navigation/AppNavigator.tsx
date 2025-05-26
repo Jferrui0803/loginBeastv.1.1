@@ -84,7 +84,14 @@ const AppNavigator = () => {
       <Stack.Screen name="Routines" component={RoutinesScreen} />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
       {/* IA Chat Screens */}
-      <Stack.Screen name="IAChatList" component={IAChatListScreen} options={{ headerShown: true, title: 'Chats IA' }} />
+      <Stack.Screen 
+        name="IAChatList" 
+        component={IAChatListScreen} 
+        options={({ route }) => ({ 
+          headerShown: true, 
+          title: route.params?.chatType === 'training' ? 'Chat Entrenamiento' : 'Chat Nutrición' 
+        })} 
+      />
       <Stack.Screen name="IAChatDetail" component={IAChatDetailScreen} options={({ route }) => ({ headerShown: true, title: route.params.chatTitle })} />
     </>
   ) : (

@@ -16,6 +16,7 @@ interface Message {
 interface IAChat {
   id: string;
   title: string;
+  description?: string;
   messages: Message[];
 }
 
@@ -141,42 +142,39 @@ const IAChatDetailScreen = () => {
     loadChat();
   }, [chatId, chatType]);  const sendMessage = async () => {
     if (!inputText.trim() || !chat || isLoading) return;
-    
     setIsLoading(true);
     const userMsg: Message = { id: Date.now().toString(), text: inputText, sender: 'user' };
-    
-    // Crear mensaje de "escribiendo..."
-    const typingMsg: Message = { 
-      id: 'typing', 
-      text: 'Escribiendo...', 
-      sender: 'bot', 
-      isTyping: true 
-    };
-    
+    const typingMsg: Message = { id: 'typing', text: 'Escribiendo...', sender: 'bot', isTyping: true };
     const updatedChatWithUser = { ...chat, messages: [...chat.messages, userMsg] };
     const updatedChatWithTyping = { ...updatedChatWithUser, messages: [...updatedChatWithUser.messages, typingMsg] };
-    
     setChat(updatedChatWithTyping);
-    
     const storedChats = await AsyncStorage.getItem(getStorageKey(chatType));
     let chats: IAChat[] = storedChats ? JSON.parse(storedChats) : [];
     chats = chats.map(c => (c.id === chatId ? updatedChatWithUser : c));
     await AsyncStorage.setItem(getStorageKey(chatType), JSON.stringify(chats));
     setInputText('');
-    
     try {
       const response = await axios.post(`${API_URL}/api/ia/consultar`, { pregunta: userMsg.text });
       const botText = response.data.respuesta || response.data.answer || '';
       const botMsg: Message = { id: (Date.now() + 1).toString(), text: botText, sender: 'bot' };
-      
-      // Remover mensaje de typing y agregar respuesta real
-      const finalChat = { ...updatedChatWithUser, messages: [...updatedChatWithUser.messages, botMsg] };
+      let finalChat: IAChat;
+      // Si es el primer mensaje, actualiza título y descripción
+      if (chat.messages.length === 0) {
+        finalChat = { ...updatedChatWithUser, title: userMsg.text, description: botText, messages: [...updatedChatWithUser.messages, botMsg] };
+      } else {
+        finalChat = { ...updatedChatWithUser, messages: [...updatedChatWithUser.messages, botMsg] };
+      }
       setChat(finalChat);
       chats = chats.map(c => (c.id === chatId ? finalChat : c));
       await AsyncStorage.setItem(getStorageKey(chatType), JSON.stringify(chats));
     } catch (error) {
       const errMsg: Message = { id: (Date.now() + 2).toString(), text: 'Error al comunicar con el servidor.', sender: 'bot' };
-      const finalChat = { ...updatedChatWithUser, messages: [...updatedChatWithUser.messages, errMsg] };
+      let finalChat: IAChat;
+      if (chat.messages.length === 0) {
+        finalChat = { ...updatedChatWithUser, title: userMsg.text, description: errMsg.text, messages: [...updatedChatWithUser.messages, errMsg] };
+      } else {
+        finalChat = { ...updatedChatWithUser, messages: [...updatedChatWithUser.messages, errMsg] };
+      }
       setChat(finalChat);
       chats = chats.map(c => (c.id === chatId ? finalChat : c));
       await AsyncStorage.setItem(getStorageKey(chatType), JSON.stringify(chats));
