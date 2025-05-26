@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, KeyboardAvoidingView, Platform, Animated } from 'react-native';
-import { TextInput, IconButton, Text, ActivityIndicator } from 'react-native-paper';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, FlatList, StyleSheet, KeyboardAvoidingView, Platform, Animated, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
+import { TextInput, IconButton, Text, ActivityIndicator, Button, Chip } from 'react-native-paper';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../context/AuthContext';
@@ -41,7 +41,6 @@ const TypingIndicator = () => {
     
     return () => clearInterval(interval);
   }, []);
-
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 4 }}>
       <ActivityIndicator size="small" color="#666" />
@@ -52,12 +51,83 @@ const TypingIndicator = () => {
   );
 };
 
+// Componente para las preguntas predefinidas
+const PredefinedQuestions = ({ 
+  chatType, 
+  onQuestionPress 
+}: { 
+  chatType: IAChatType; 
+  onQuestionPress: (question: string) => void;
+}) => {
+  const nutritionQuestions = [
+    "Hazme una dieta para perder peso",
+    "Hazme una dieta para ganar peso",
+    "¿Qué alimentos debo evitar para adelgazar?",
+    "Dame un plan de comidas saludables",
+    "¿Cuántas calorías necesito al día?",
+    "Alimentos ricos en proteínas",
+    "¿Qué puedo comer antes de entrenar?",
+    "Recetas saludables para el desayuno",
+    "¿Qué snacks saludables puedo comer?",
+    "¿Cómo puedo aumentar mi masa muscular con la dieta?",
+    "¿Qué alimentos ayudan a la recuperación muscular?",
+    "¿Qué puedo cenar si quiero bajar de peso?",
+    "¿Cómo organizar mis comidas durante el día?"
+  ];
+
+  const trainingQuestions = [
+    "Rutina de ejercicios para principiantes",
+    "Ejercicios para ganar masa muscular",
+    "Rutina de cardio para quemar grasa",
+    "¿Cuántos días debo entrenar a la semana?",
+    "Ejercicios para trabajar abdominales",
+    "Rutina de entrenamiento en casa",
+    "¿Cómo mejorar mi resistencia?",
+    "Ejercicios para fortalecer la espalda",
+    "¿Qué ejercicios puedo hacer sin equipamiento?",
+    "¿Cómo calentar antes de entrenar?",
+    "¿Qué estiramientos debo hacer después de entrenar?",
+    "Rutina para tonificar todo el cuerpo",
+    "¿Cómo evitar lesiones al entrenar?",
+    "¿Qué ejercicios ayudan a perder grasa abdominal?",
+    "¿Cómo organizar una semana de entrenamiento?"
+  ];
+
+  const questions = chatType === 'nutrition' ? nutritionQuestions : trainingQuestions;
+
+  return (
+    <View style={styles.predefinedQuestionsContainer}>
+      <Text style={styles.predefinedQuestionsTitle}>
+        Preguntas rápidas:
+      </Text>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.questionsScrollView}
+      >
+        {questions.map((question, index) => (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.7}
+            onPress={() => onQuestionPress(question)}
+            style={styles.questionChip}
+          >
+            <Text style={styles.questionChipText}>{question}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
 const IAChatDetailScreen = () => {
   const route = useRoute<ChatRouteProp>();
   const { chatId, chatTitle, chatType } = route.params;
   const [chat, setChat] = useState<IAChat | null>(null);
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const inputRef = useRef<any>(null);
 
   useEffect(() => {
     const loadChat = async () => {
@@ -69,8 +139,7 @@ const IAChatDetailScreen = () => {
       }
     };
     loadChat();
-  }, [chatId, chatType]);
-  const sendMessage = async () => {
+  }, [chatId, chatType]);  const sendMessage = async () => {
     if (!inputText.trim() || !chat || isLoading) return;
     
     setIsLoading(true);
@@ -114,7 +183,15 @@ const IAChatDetailScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  };  return (
+  };
+  const handlePredefinedQuestionPress = (question: string) => {
+    setInputText(question);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
+
+  return (
     <KeyboardAvoidingView 
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -131,13 +208,25 @@ const IAChatDetailScreen = () => {
         contentContainerStyle={styles.messagesContainer}
         style={styles.messagesList}
       />
+
+      {/* Preguntas predefinidas SIEMPRE visibles encima del input */}
+      {(chatType === 'nutrition' || chatType === 'training') && (
+        <PredefinedQuestions 
+          chatType={chatType} 
+          onQuestionPress={handlePredefinedQuestionPress} 
+        />
+      )}
+      
       <View style={styles.inputContainer}>
         <TextInput
+          ref={inputRef}
           style={styles.input}
           placeholder="Escribe tu mensaje..."
           value={inputText}
           onChangeText={setInputText}
           multiline
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
         <IconButton icon="send" onPress={sendMessage} disabled={isLoading} />
       </View>
@@ -168,5 +257,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', 
     marginRight: 8,
     maxHeight: 100
+  },
+  predefinedQuestionsContainer: {
+    padding: 16,
+    backgroundColor: '#f5f5dc',
+    borderTopWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  predefinedQuestionsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  questionsScrollView: {
+    flexDirection: 'row',
+  },
+  questionChip: {
+    marginRight: 8,
+    backgroundColor: '#fff',
+    borderColor: '#ffa500',
+    padding: 8,
+    borderRadius: 16,
+  },
+  questionChipText: {
+    fontSize: 12,
+    color: '#ffa500',
   },
 });
