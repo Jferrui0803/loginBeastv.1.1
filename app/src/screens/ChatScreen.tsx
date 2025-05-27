@@ -20,6 +20,7 @@ interface Message {
   content: string;
   senderId: string;
   createdAt: string;
+  isRead?: boolean; // Nuevo campo para saber si el mensaje fue leído
 }
 
 export default function ChatScreen() {
@@ -50,6 +51,24 @@ export default function ChatScreen() {
       socket.disconnect();
     };
   }, [chatId]);
+
+  // Marcar mensajes como leídos al abrir el chat
+  useEffect(() => {
+    if (messages.length > 0) {
+      const unread = messages.filter(
+        m => m.senderId !== userId && !m.isRead
+      );
+      if (unread.length > 0) {
+        unread.forEach(async (msg) => {
+          try {
+            await axios.post(`${API_URL}/api/chats/${chatId}/messages/${msg.id}/read`);
+            // Opcional: actualizar localmente el estado
+            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
+          } catch {}
+        });
+      }
+    }
+  }, [messages, chatId, userId]);
 
   const sendMessage = async () => {
     if (!inputText.trim()) return;
@@ -83,6 +102,12 @@ export default function ChatScreen() {
             item.senderId === userId ? styles.messageSent : styles.messageReceived
           ]}>
             <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
+            {/* Indicador de leído solo para mensajes enviados por el usuario actual */}
+            {item.senderId === userId && (
+              <Text style={{ fontSize: 10, color: item.isRead ? '#4caf50' : '#aaa', alignSelf: 'flex-end', marginTop: 2 }}>
+                {item.isRead ? 'Leído' : 'Enviado'}
+              </Text>
+            )}
           </View>
         )}
         contentContainerStyle={styles.messagesContainer}
