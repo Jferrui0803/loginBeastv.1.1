@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, FlatList, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, FlatList, StyleSheet, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { TextInput, IconButton, Text } from 'react-native-paper';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -28,17 +28,43 @@ export default function ChatScreen() {
   const { chatId } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const socketRef = useRef<any>(null);
-  const flatListRef = useRef<FlatList>(null);
-  const { authState } = useAuth();
+  const flatListRef = useRef<FlatList>(null);  const { authState } = useAuth();
   const userId = authState?.userId;
 
   // Carga mensajes previos
   useEffect(() => {
     axios.get(`${API_URL}/api/chats/${chatId}/messages`)
-      .then(res => setMessages(res.data))
+      .then(res => {
+        setMessages(res.data);
+        // Hacer scroll al final después de cargar los mensajes
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 100);
+      })
       .catch(() => {});
   }, [chatId]);
+
+  // Listeners del teclado
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', (e) => {
+      setKeyboardHeight(e.endCoordinates.height);
+      // Scroll al final cuando aparece el teclado
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    });
+
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      keyboardDidShowListener?.remove();
+      keyboardDidHideListener?.remove();
+    };
+  }, []);
 
   // Conexión Socket.IO
   useEffect(() => {
@@ -76,15 +102,19 @@ export default function ChatScreen() {
       }
     }
   }, [messages, chatId, userId]);
-
-  // Scroll automático al recibir un mensaje nuevo o al cargar mensajes previos
+  // Scroll automático solo para mensajes nuevos (no para la carga inicial)
   useEffect(() => {
     if (messages.length > 0) {
-      setTimeout(() => {
-        flatListRef.current?.scrollToEnd({ animated: true });
-      }, 100);
+      // Solo hacer scroll automático si hay más de un mensaje 
+      // (evitar el scroll en la carga inicial que ya se maneja arriba)
+      const isInitialLoad = messages.length === 1;
+      if (!isInitialLoad) {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }
     }
-  }, [messages]);
+  }, [messages.length]); // Cambiar la dependencia para que solo responda a cambios en la cantidad
 
   const sendMessage = async () => {
     if (!inputText.trim()) return;
@@ -96,47 +126,73 @@ export default function ChatScreen() {
       // No agregues el mensaje manualmente al estado, espera a recibirlo por WebSocket
       if (socketRef.current) {
         socketRef.current.emit('send-message', { chatId, content });
-      }
-    } catch (e) {
+      }    } catch (e) {
       // Manejo de error opcional
     }
   };
+
   return (
     <KeyboardAvoidingView 
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <View style={[
-            styles.messageBubble,
-            item.senderId === userId ? styles.messageSent : styles.messageReceived
-          ]}>
-            <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
-            {/* Indicador de leído solo para mensajes enviados por el usuario actual */}
-            {item.senderId === userId && (
-              <Text style={{ fontSize: 10, color: item.isRead ? '#4caf50' : '#aaa', alignSelf: 'flex-end', marginTop: 2 }}>
-                {item.isRead ? 'Leído' : 'Enviado'}
-              </Text>
-            )}
-          </View>
-        )}
-        contentContainerStyle={styles.messagesContainer}
-        style={styles.messagesList}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Escribe un mensaje..."
-          value={inputText}
-          onChangeText={setInputText}
-          multiline
+      <View style={[styles.chatContainer, { paddingBottom: Platform.OS === 'android' ? keyboardHeight : 0 }]}>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <View style={[
+              styles.messageBubble,
+              item.senderId === userId ? styles.messageSent : styles.messageReceived
+            ]}>
+              <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
+              {/* Indicador de leído solo para mensajes enviados por el usuario actual */}
+              {item.senderId === userId && (
+                <Text style={{ fontSize: 10, color: item.isRead ? '#4caf50' : '#aaa', alignSelf: 'flex-end', marginTop: 2 }}>
+                  {item.isRead ? 'Leído' : 'Enviado'}
+                </Text>
+              )}
+            </View>
+          )}
+          contentContainerStyle={styles.messagesContainer}
+          style={styles.messagesList}
+          keyboardShouldPersistTaps="handled"
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+            autoscrollToTopThreshold: 10,
+          }}
+          onContentSizeChange={() => {
+            // Asegurar scroll al final cuando cambie el contenido
+            if (messages.length > 0) {
+              flatListRef.current?.scrollToEnd({ animated: false });
+            }
+          }}
+          onLayout={() => {
+            // Scroll al final cuando se renderice el layout
+            if (messages.length > 0) {
+              setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: false });
+              }, 50);
+            }
+          }}
         />
-        <IconButton icon="send" onPress={sendMessage} />
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe un mensaje..."
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            onFocus={() => {
+              setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+              }, 300);
+            }}
+          />
+          <IconButton icon="send" onPress={sendMessage} />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -144,6 +200,7 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5dc' },
+  chatContainer: { flex: 1 },
   messagesList: { flex: 1 },
   messagesContainer: { padding: 16, flexGrow: 1 },
   messageBubble: {
