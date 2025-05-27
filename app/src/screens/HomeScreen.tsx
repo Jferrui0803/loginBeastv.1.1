@@ -1,10 +1,6 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image, RefreshControl } from 'react-native';
-<<<<<<< HEAD
-import { Text, Card, Button, Surface, FAB, Chip, IconButton } from 'react-native-paper';
-=======
-import { Text, Card, Button, Surface, FAB, Chip, ActivityIndicator } from 'react-native-paper';
->>>>>>> 2aeed5d6581c3a684428f813a28b11b7295ce682
+import { Text, Card, Button, Surface, FAB, Chip } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
