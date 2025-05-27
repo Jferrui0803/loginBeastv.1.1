@@ -1,6 +1,10 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image, RefreshControl } from 'react-native';
+<<<<<<< HEAD
 import { Text, Card, Button, Surface, FAB, Chip, IconButton } from 'react-native-paper';
+=======
+import { Text, Card, Button, Surface, FAB, Chip, ActivityIndicator } from 'react-native-paper';
+>>>>>>> 2aeed5d6581c3a684428f813a28b11b7295ce682
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -33,7 +37,8 @@ export default function HomeScreen() {
     const onRefresh = async () => {
         setRefreshing(true);
         // Aquí puedes recargar datos desde API o AsyncStorage si lo necesitas
-        setTimeout(() => setRefreshing(false), 1000); // Simulación de recarga
+        // Mantener el spinner visible al menos 1.5 segundos
+        setTimeout(() => setRefreshing(false), 1500);
     };
     // Detectar scroll al tope superior para recargar
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -152,14 +157,9 @@ export default function HomeScreen() {
                 </View>
             </View>
         </Surface>
-    );
-
-    return (
+    );    return (
         <View style={styles.container}>
             <ScrollView
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#ffa500"]} />
-                }
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
             >
@@ -228,9 +228,15 @@ export default function HomeScreen() {
                                 onPress={() => navigation.navigate('ChatList')}
                             >Abrir chats</Button>
                         </Card.Actions>
-                    </Card>
-                </View>
+                    </Card>                </View>
             </ScrollView>
+            
+            {refreshing && (
+                <View style={styles.refreshingOverlay} pointerEvents="none">
+                    <ActivityIndicator size="large" color="#ffa500" />
+                    <Text style={styles.refreshingText}>Recargando...</Text>
+                </View>
+            )}
             
             <FAB
                 icon="plus"
@@ -307,12 +313,28 @@ const styles = StyleSheet.create({
     statLabel: {
         color: '#757575',
         marginTop: 4,
-    },
-    fab: {
+    },    fab: {
         position: 'absolute',
         margin: 16,
         right: 0,
         bottom: 0,
         backgroundColor: '#ffa500',
+    },
+    refreshingOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(245,245,220,0.8)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    refreshingText: {
+        marginTop: 16,
+        fontSize: 18,
+        color: '#ffa500',
+        fontWeight: 'bold',
     },
 });
