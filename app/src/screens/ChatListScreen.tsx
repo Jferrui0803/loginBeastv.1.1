@@ -220,8 +220,8 @@ export default function ChatListScreen() {
       ) : !chats.length ? (
         <View style={styles.empty}>
           <Text>No tienes chats aún.</Text>
-        </View>
-      ) : (        <FlatList
+        </View>      ) : (
+        <FlatList
           data={chats}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (

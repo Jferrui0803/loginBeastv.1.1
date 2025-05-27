@@ -222,9 +222,10 @@ export default function HomeScreen() {
                                 style={{ backgroundColor: '#f5f5dc' }}
                                 textColor="black"
                                 onPress={() => navigation.navigate('ChatList')}
-                            >Abrir chats</Button>
+                            ><Text>Abrir chats</Text></Button>
                         </Card.Actions>
-                    </Card>                </View>
+                    </Card>                
+                </View>
             </ScrollView>
             
             {refreshing && (

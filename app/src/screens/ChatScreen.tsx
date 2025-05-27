@@ -29,7 +29,8 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const socketRef = useRef<any>(null);
-  const flatListRef = useRef<FlatList>(null);  const { authState } = useAuth();
+  const flatListRef = useRef<FlatList>(null);
+  const { authState } = useAuth();
   const userId = authState?.userId;
 
   // Carga mensajes previos
@@ -81,7 +82,8 @@ export default function ChatScreen() {
     socketRef.current = socket;
     return () => {
       socket.disconnect();
-    };  }, [chatId, userId, authState?.token]);
+    };
+  }, [chatId, userId, authState?.token]);
 
   // Scroll automático solo para mensajes nuevos (no para la carga inicial)
   useEffect(() => {
@@ -98,17 +100,20 @@ export default function ChatScreen() {
   }, [messages.length]); // Cambiar la dependencia para que solo responda a cambios en la cantidad
 
   const sendMessage = async () => {
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !userId) return;
     const content = inputText;
     setInputText('');
     try {
-      // Guardar mensaje en el backend
-      await axios.post(`${API_URL}/api/chats/${chatId}/messages`, { content });
-      // No agregues el mensaje manualmente al estado, espera a recibirlo por WebSocket
+      // Enviar el senderId junto con el mensaje
       if (socketRef.current) {
-        socketRef.current.emit('send-message', { chatId, content });
-      }    } catch (e) {
-      // Manejo de error opcional
+        socketRef.current.emit('send-message', { 
+          chatId, 
+          content, 
+          senderId: userId 
+        });
+      }
+    } catch (e) {
+      console.error('Error sending message:', e);
     }
   };
 
@@ -122,12 +127,15 @@ export default function ChatScreen() {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={item => item.id}          renderItem={({ item }) => (
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
             <View style={[
               styles.messageBubble,
               item.senderId === userId ? styles.messageSent : styles.messageReceived
             ]}>
-              <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
+              <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>
+                {item.content}
+              </Text>
             </View>
           )}
           contentContainerStyle={styles.messagesContainer}
@@ -138,13 +146,13 @@ export default function ChatScreen() {
             autoscrollToTopThreshold: 10,
           }}
           onContentSizeChange={() => {
-            // Asegurar scroll al final cuando cambie el contenido
+            {/* Asegurar scroll al final cuando cambie el contenido */}
             if (messages.length > 0) {
               flatListRef.current?.scrollToEnd({ animated: false });
             }
           }}
           onLayout={() => {
-            // Scroll al final cuando se renderice el layout
+            {/* Scroll al final cuando se renderice el layout */}
             if (messages.length > 0) {
               setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: false });
