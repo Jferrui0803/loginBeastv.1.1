@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image, RefreshControl } from 'react-native';
-import { Text, Card, Button, Surface, FAB, Chip } from 'react-native-paper';
+import { Text, Card, Button, Surface, FAB, Chip, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -41,6 +41,20 @@ export default function HomeScreen() {
             onRefresh();
         }
     };
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <IconButton
+                    icon="account-circle"
+                    size={24}
+                    iconColor="#000000"
+                    onPress={() => navigation.navigate('Profile')}
+                    style={{ marginRight: 8 }}
+                />
+            ),
+            headerShown: true,
+        });
+    }, [navigation]);
 
     const renderWorkoutCard = () => (
         <Card style={styles.card}>
