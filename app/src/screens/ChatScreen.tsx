@@ -29,6 +29,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const socketRef = useRef<any>(null);
+  const flatListRef = useRef<FlatList>(null);
   const { authState } = useAuth();
   const userId = authState?.userId;
 
@@ -76,6 +77,15 @@ export default function ChatScreen() {
     }
   }, [messages, chatId, userId]);
 
+  // Scroll automático al recibir un mensaje nuevo o al cargar mensajes previos
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages]);
+
   const sendMessage = async () => {
     if (!inputText.trim()) return;
     const content = inputText;
@@ -98,6 +108,7 @@ export default function ChatScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <FlatList
+        ref={flatListRef}
         data={messages}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
