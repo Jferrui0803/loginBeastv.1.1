@@ -41,16 +41,22 @@ export default function ChatScreen() {
 
   // Conexión Socket.IO
   useEffect(() => {
-    const socket = io(API_URL);
-    socket.emit('join-chat', { chatId });
+    const socket = io(API_URL, {
+      auth: { token: authState?.token }, // Enviar token si es necesario
+    });
+    socket.emit('join-chat', chatId); // Unirse a la sala del chat
+    if (userId) {
+      socket.emit('join-user', userId); // Unirse a la sala personal del usuario
+    }
     socket.on('receive-message', (msg: Message) => {
       setMessages(prev => [...prev, msg]);
+      console.log('Nuevo mensaje recibido:', msg);
     });
     socketRef.current = socket;
     return () => {
       socket.disconnect();
     };
-  }, [chatId]);
+  }, [chatId, userId, authState?.token]);
 
   // Marcar mensajes como leídos al abrir el chat
   useEffect(() => {
@@ -76,10 +82,8 @@ export default function ChatScreen() {
     setInputText('');
     try {
       // Guardar mensaje en el backend
-      const res = await axios.post(`${API_URL}/api/chats/${chatId}/messages`, { content });
-      const newMsg = res.data;
-      setMessages(prev => [...prev, newMsg]);
-      // Emitir por WebSocket (opcional, si el backend no lo hace automáticamente)
+      await axios.post(`${API_URL}/api/chats/${chatId}/messages`, { content });
+      // No agregues el mensaje manualmente al estado, espera a recibirlo por WebSocket
       if (socketRef.current) {
         socketRef.current.emit('send-message', { chatId, content });
       }
