@@ -20,7 +20,6 @@ interface Message {
   content: string;
   senderId: string;
   createdAt: string;
-  isRead?: boolean; // Nuevo campo para saber si el mensaje fue leído
 }
 
 export default function ChatScreen() {
@@ -82,26 +81,8 @@ export default function ChatScreen() {
     socketRef.current = socket;
     return () => {
       socket.disconnect();
-    };
-  }, [chatId, userId, authState?.token]);
+    };  }, [chatId, userId, authState?.token]);
 
-  // Marcar mensajes como leídos al abrir el chat
-  useEffect(() => {
-    if (messages.length > 0) {
-      const unread = messages.filter(
-        m => m.senderId !== userId && !m.isRead
-      );
-      if (unread.length > 0) {
-        unread.forEach(async (msg) => {
-          try {
-            await axios.post(`${API_URL}/api/chats/${chatId}/messages/${msg.id}/read`);
-            // Opcional: actualizar localmente el estado
-            setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
-          } catch {}
-        });
-      }
-    }
-  }, [messages, chatId, userId]);
   // Scroll automático solo para mensajes nuevos (no para la carga inicial)
   useEffect(() => {
     if (messages.length > 0) {
@@ -141,19 +122,12 @@ export default function ChatScreen() {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
+          keyExtractor={item => item.id}          renderItem={({ item }) => (
             <View style={[
               styles.messageBubble,
               item.senderId === userId ? styles.messageSent : styles.messageReceived
             ]}>
               <Text style={item.senderId === userId ? styles.textSent : styles.textReceived}>{item.content}</Text>
-              {/* Indicador de leído solo para mensajes enviados por el usuario actual */}
-              {item.senderId === userId && (
-                <Text style={{ fontSize: 10, color: item.isRead ? '#4caf50' : '#aaa', alignSelf: 'flex-end', marginTop: 2 }}>
-                  {item.isRead ? 'Leído' : 'Enviado'}
-                </Text>
-              )}
             </View>
           )}
           contentContainerStyle={styles.messagesContainer}
