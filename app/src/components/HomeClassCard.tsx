@@ -9,7 +9,7 @@ import { Text, Card } from 'react-native-paper';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
-import { jwtDecode } from 'jwt-decode'; // CORREGIDO: importación por defecto
+import { jwtDecode } from 'jwt-decode'; 
 
 interface Clase {
   id: string;
@@ -58,7 +58,7 @@ const ClassesSection: React.FC = () => {
         });
 
         // Filtramos clases por gymId que tenemos en el token
-
+        console.log('Clases del gimnasio:', data);
         const clasesDelGimnasio = data.filter((clase) => clase.gym.id === gymId);
         
         setClases(clasesDelGimnasio);
@@ -84,7 +84,7 @@ const ClassesSection: React.FC = () => {
   if (error) {
     return (
       <View style={styles.loader}>
-        <Text variant="bodyMedium" style={{ color: 'red' }}>{error}</Text>
+        <Text style={{ color: 'red' }}>{error}</Text>
       </View>
     );
   }
