@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder } from 'react-native';
+import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { List, ActivityIndicator, Text, FAB } from 'react-native-paper';
 import axios from 'axios';
 import { API_URL } from '../../context/AuthContext';
@@ -59,6 +59,23 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
+  },
+  refreshingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  refreshingText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: '#ffa500',
+    fontWeight: 'bold',
   },
 });
 
@@ -154,16 +171,38 @@ const SwipeableChatItem = ({
 export default function ChatListScreen() {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProp>();
-
   useEffect(() => {
-    axios.get(`${API_URL}/api/chats`)
-      .then(res => {
-        setChats(res.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    loadChats();
   }, []);
+
+  const loadChats = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/chats`);
+      setChats(res.data);
+    } catch {
+      // Error silenciado
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Recarga real
+    await loadChats();
+    // Mantener el spinner visible al menos 1.5 segundos
+    setTimeout(() => setRefreshing(false), 1500);
+  };
+
+  // Detectar scroll al tope superior para recargar
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
+      onRefresh();
+    }
+  };
 
   const deleteChat = async (chatId: string) => {
     try {
@@ -182,8 +221,7 @@ export default function ChatListScreen() {
         <View style={styles.empty}>
           <Text>No tienes chats aún.</Text>
         </View>
-      ) : (
-        <FlatList
+      ) : (        <FlatList
           data={chats}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
@@ -193,7 +231,15 @@ export default function ChatListScreen() {
               onDelete={() => deleteChat(item.id)}
             />
           )}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         />
+      )}
+      {refreshing && (
+        <View style={styles.refreshingOverlay} pointerEvents="none">
+          <ActivityIndicator size="large" color="#ffa500" />
+          <Text style={styles.refreshingText}>Recargando...</Text>
+        </View>
       )}
       <FAB
         icon="plus"
