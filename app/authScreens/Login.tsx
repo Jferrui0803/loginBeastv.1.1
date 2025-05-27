@@ -1,98 +1,112 @@
-import { View, Text, Image, Button, StyleSheet, TextInput } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { API_URL, useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { Text, TextInput, Button, Surface } from 'react-native-paper';
+import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { onLogin, onRegister } = useAuth();
+    const { onLogin } = useAuth();
+    const navigation = useNavigation();
 
-    useEffect(() => {
-        const testCall = async () => {
-            const result = await axios.get(`${API_URL}/api/auth/login`);
-
-        }
-        testCall();
-    }, []);
-
-    const login = async () => {
+    const handleLogin = async () => {
         try {
             const result = await onLogin!(email, password);
-            if (result.error) {
+            if (result && result.error) {
                 alert(result.msg);
-            } else {
-                console.log('Login successful', result.data);
             }
         } catch (error) {
             if (error instanceof Error) {
-                alert('Error inesperado: ' + error.message);
+                alert('Error al iniciar sesión: ' + error.message);
             } else {
-                alert('Error inesperado');
+                alert('Error al iniciar sesión');
             }
             console.error(error);
         }
     };
-    const register = async () => {
-        try {
-            const result = await onRegister!(email, password);
-            if (result.error) {
-                alert(result.msg);
-            } else {
-                await login();
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                alert('Error inesperado: ' + error.message);
-            } else {
-                alert('Error inesperado');
-            }
-            console.error(error);
-        }
-    };
+
     return (
-        <View style={styles.container}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0' }} style={styles.image} />
-            <View style={styles.form}>
-                <TextInput style={styles.input} placeholder="Email" onChangeText={(text: string) => setEmail(text)} value={email} />
-                <TextInput style={styles.input} placeholder="Password" secureTextEntry={true} onChangeText={(text: string) => setPassword(text)} value={password} />
-                <Button onPress={login} title="Sign In" />
-                <Button onPress={register} title="Create Account" />
+        <ScrollView contentContainerStyle={styles.scrollView}>
+            <View style={styles.container}>
+                <Surface style={styles.formContainer} elevation={2}>
+                    <Text style={styles.title}>Iniciar Sesión</Text>
+                    
+                    <TextInput
+                        label="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        mode="outlined"
+                        style={styles.input}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                    />
+
+                    <TextInput
+                        label="Contraseña"
+                        value={password}
+                        onChangeText={setPassword}
+                        mode="outlined"
+                        style={styles.input}
+                        secureTextEntry
+                    />
+
+                    <Button 
+                        mode="contained"
+                        onPress={handleLogin}
+                        style={styles.button}
+                        buttonColor="#ffa500"
+                    >
+                        Iniciar Sesión
+                    </Button>
+
+                    <Button
+                        mode="text"
+                        onPress={() => navigation.navigate('Register')}
+                        style={styles.linkButton}
+                        textColor="#ffa500"
+                    >
+                        ¿No tienes cuenta? Regístrate
+                    </Button>
+                </Surface>
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
-
-
-
-
-
 const styles = StyleSheet.create({
-    image: {
-        width: '50%',
-        height: '50%',
-        resizeMode: 'contain',
-    },
-    form: {
-        gap: 10,
-        width: '60%',
-    },
-    input: {
-        height: 44,
-        borderWidth: 1,
-        borderRadius: 4,
-        padding: 10,
-        backgroundColor: '#fff',
+    scrollView: {
+        flexGrow: 1,
     },
     container: {
-        alignItems: 'center',
-        width: '100%',
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#f5f5dc',
         justifyContent: 'center',
-        top: 30
     },
-
+    formContainer: {
+        padding: 16,
+        borderRadius: 8,
+        backgroundColor: 'white',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 24,
+        textAlign: 'center',
+        color: '#ffa500',
+    },
+    input: {
+        marginBottom: 16,
+        backgroundColor: 'white',
+    },
+    button: {
+        marginTop: 8,
+        marginBottom: 16,
+    },
+    linkButton: {
+        marginTop: 8,
+    }
 });
 
 export default Login;
-
