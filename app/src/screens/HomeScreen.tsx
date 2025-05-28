@@ -32,11 +32,8 @@ export default function HomeScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const onRefresh = async () => {
         setRefreshing(true);
-        // Aquí puedes recargar datos desde API o AsyncStorage si lo necesitas
-        // Mantener el spinner visible al menos 1.5 segundos
         setTimeout(() => setRefreshing(false), 1500);
     };
-    // Detectar scroll al tope superior para recargar
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
             onRefresh();
@@ -153,11 +150,14 @@ export default function HomeScreen() {
                 </View>
             </View>
         </Surface>
-    );    return (
+    );
+
+    return (
         <View style={styles.container}>
             <ScrollView
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
+                contentContainerStyle={{ paddingBottom: 80 }} // Espacio para la barra inferior
             >
                 {renderWorkoutCard()}
                 {renderQuickActions()}
@@ -240,6 +240,34 @@ export default function HomeScreen() {
                 style={styles.fab}
                 onPress={() => console.log('Agregar nuevo entrenamiento')}
             />
+
+            {/* Barra de navegación inferior fija */}
+            <View style={styles.bottomBar}>
+                <IconButton
+                    icon="home"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('Home')}
+                />
+                <IconButton
+                    icon="calendar"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('ClassBooking')}
+                />
+                <IconButton
+                    icon="chart-line"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => alert('Que no está implementado todavía, ansias')}
+                />
+                <IconButton
+                    icon="dumbbell"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('Routines')}
+                />
+            </View>
         </View>
     );
 }
@@ -310,11 +338,12 @@ const styles = StyleSheet.create({
     statLabel: {
         color: '#757575',
         marginTop: 4,
-    },    fab: {
+    },
+    fab: {
         position: 'absolute',
         margin: 16,
         right: 0,
-        bottom: 0,
+        bottom: 80, // para que no tape la barra
         backgroundColor: '#ffa500',
     },
     refreshingOverlay: {
@@ -334,4 +363,19 @@ const styles = StyleSheet.create({
         color: '#ffa500',
         fontWeight: 'bold',
     },
+    bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 64,
+    backgroundColor: '#b8860b',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    zIndex: 100,
+    elevation: 10,
+},
 });
