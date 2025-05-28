@@ -14,7 +14,7 @@ import HomeClassCard from '../components/HomeClassCard';
 type RootStackParamList = {
     Login: undefined;
     Register: undefined;
-    Home: undefined;
+    HomeScreen: undefined;
     Profile: undefined;
     GymMap: undefined;
     WorkoutDetail: undefined;
@@ -62,7 +62,6 @@ export default function HomeScreen() {
             setRefreshing(false);
         }
     };
-    // Detectar scroll al tope superior para recargar
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
             onRefresh();
@@ -137,7 +136,7 @@ export default function HomeScreen() {
                 style={styles.actionButton}
                 textColor="black"
                 onPress={() => navigation.navigate('ClassBooking')}>
-                Reservar clase
+                Reservar clases
             </Button>
             <Button
                 mode="contained-tonal"
@@ -179,7 +178,9 @@ export default function HomeScreen() {
                 </View>
             </View>
         </Surface>
-    );    return (
+    );
+
+    return (
         <View style={styles.container}>
             <ScrollView
                 refreshControl={
@@ -191,6 +192,7 @@ export default function HomeScreen() {
                     />
                 }
                 scrollEventThrottle={16}
+                contentContainerStyle={{ paddingBottom: 80 }} // Espacio para la barra inferior
             >
                 {renderWorkoutCard()}
                 {renderQuickActions()}
@@ -266,6 +268,34 @@ export default function HomeScreen() {
                 style={styles.fab}
                 onPress={() => console.log('Agregar nuevo entrenamiento')}
             />
+
+            {/* Barra de navegación inferior fija */}
+            <View style={styles.bottomBar}>
+                <IconButton
+                    icon="home"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('HomeScreen')}
+                />
+                <IconButton
+                    icon="calendar"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('ClassBooking')}
+                />
+                <IconButton
+                    icon="chart-line"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => alert('Que no está implementado todavía, ansias')}
+                />
+                <IconButton
+                    icon="dumbbell"
+                    size={32}
+                    iconColor="white"
+                    onPress={() => navigation.navigate('Routines')}
+                />
+            </View>
         </View>
     );
 }
@@ -336,11 +366,12 @@ const styles = StyleSheet.create({
     statLabel: {
         color: '#757575',
         marginTop: 4,
-    },    fab: {
+    },
+    fab: {
         position: 'absolute',
         margin: 16,
         right: 0,
-        bottom: 0,
+        bottom: 80, // para que no tape la barra
         backgroundColor: '#ffa500',
     },
 });
