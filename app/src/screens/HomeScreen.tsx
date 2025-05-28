@@ -5,6 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { API_URL } from '../../context/AuthContext';
 
 import HomeClassCard from '../components/HomeClassCard';
 
@@ -30,11 +33,34 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function HomeScreen() {
     const navigation = useNavigation<NavigationProp>();
     const [refreshing, setRefreshing] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0); // Para forzar recarga de clases
     const onRefresh = async () => {
         setRefreshing(true);
-        // Aquí puedes recargar datos desde API o AsyncStorage si lo necesitas
-        // Mantener el spinner visible al menos 1.5 segundos
-        setTimeout(() => setRefreshing(false), 1500);
+        try {
+            // Refresca el token del usuario antes de recargar las clases
+            const token = await SecureStore.getItemAsync('userToken');
+            if (token) {
+                // Cambia la ruta si tu backend usa otra para devolver el usuario y el nuevo token
+                const { data } = await axios.get(`${API_URL}/api/users/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                // Si el backend devuelve un nuevo token actualizado:
+                if (data.token) {
+                    await SecureStore.setItemAsync('userToken', data.token);
+                }
+            }
+        } catch (e) {
+            // Si falla, sigue con la recarga visual
+        }
+        setReloadKey(prev => prev + 1); // Forzar recarga de clases
+        const start = Date.now();
+        // Mantener el spinner visible al menos 400ms para evitar parpadeos
+        const elapsed = Date.now() - start;
+        if (elapsed < 400) {
+            setTimeout(() => setRefreshing(false), 400 - elapsed);
+        } else {
+            setRefreshing(false);
+        }
     };
     // Detectar scroll al tope superior para recargar
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -169,7 +195,7 @@ export default function HomeScreen() {
                 {renderWorkoutCard()}
                 {renderQuickActions()}
                 {renderStats()}
-                <HomeClassCard />
+                <HomeClassCard reloadTrigger={reloadKey} />
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: 'black' }]}>Nutrición</Text>
                     <Card style={styles.nutritionCard}>
