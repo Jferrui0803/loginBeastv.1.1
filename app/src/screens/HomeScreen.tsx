@@ -108,7 +108,7 @@ export default function HomeScreen() {
                 style={styles.actionButton}
                 textColor="black"
                 onPress={() => navigation.navigate('ClassBooking')}>
-                Reservar clase
+                Reservar clases
             </Button>
             <Button
                 mode="contained-tonal"
