@@ -9,7 +9,7 @@ import { Text, Card } from 'react-native-paper';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
-import { jwtDecode } from 'jwt-decode'; // CORREGIDO: importación por defecto
+import { jwtDecode } from 'jwt-decode'; 
 
 interface Clase {
   id: string;
@@ -33,45 +33,38 @@ interface JwtPayload {
   exp: number;
 }
 
-const ClassesSection: React.FC = () => {
+// Permitir recarga desde el padre (HomeScreen)
+const ClassesSection: React.FC<{ reloadTrigger?: number }> = ({ reloadTrigger }) => {
   const [clases, setClases] = useState<Clase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchClases = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = await SecureStore.getItemAsync('userToken');
+      if (!token) throw new Error('Token no encontrado.');
+      const decoded = jwtDecode<JwtPayload>(token);
+      const gymId = decoded.gymId;
+      if (!gymId) throw new Error('gymId no presente en el token.');
+      const { data } = await axios.get<Clase[]>(`${API_URL}/api/classes`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const clasesDelGimnasio = data.filter((clase) => clase.gym.id === gymId);
+      setClases(clasesDelGimnasio);
+    } catch (err: any) {
+      setError(err.message ?? 'Error al cargar clases');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchClases = async () => {
-      try {
-        const token = await SecureStore.getItemAsync('userToken');
-        if (!token) throw new Error('Token no encontrado.');
-
-        const decoded = jwtDecode<JwtPayload>(token);
-        const gymId = decoded.gymId;
-
-        console.log('Gym ID:', gymId);
-
-        if (!gymId) throw new Error('gymId no presente en el token.');
-
-        const { data } = await axios.get<Clase[]>(`${API_URL}/api/classes`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        // Filtramos clases por gymId que tenemos en el token
-
-        const clasesDelGimnasio = data.filter((clase) => clase.gym.id === gymId);
-        
-        setClases(clasesDelGimnasio);
-
-      } catch (err: any) {
-        setError(err.message ?? 'Error al cargar clases');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchClases();
-  }, []);
+  }, [reloadTrigger]);
 
   if (loading) {
     return (
@@ -84,7 +77,7 @@ const ClassesSection: React.FC = () => {
   if (error) {
     return (
       <View style={styles.loader}>
-        <Text variant="bodyMedium" style={{ color: 'red' }}>{error}</Text>
+        <Text style={{ color: 'red' }}>{error}</Text>
       </View>
     );
   }

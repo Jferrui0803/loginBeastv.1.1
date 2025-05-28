@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, FlatList, StyleSheet, Animated, TouchableOpacity, Alert, PanResponder, RefreshControl } from 'react-native';
 import { List, ActivityIndicator, Text, FAB } from 'react-native-paper';
 import axios from 'axios';
 import { API_URL } from '../../context/AuthContext';
@@ -59,23 +59,6 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
-  },
-  refreshingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  refreshingText: {
-    marginTop: 16,
-    fontSize: 18,
-    color: '#ffa500',
-    fontWeight: 'bold',
   },
 });
 
@@ -191,16 +174,14 @@ export default function ChatListScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Recarga real
+    const start = Date.now();
     await loadChats();
-    // Mantener el spinner visible al menos 1.5 segundos
-    setTimeout(() => setRefreshing(false), 1500);
-  };
-
-  // Detectar scroll al tope superior para recargar
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
-      onRefresh();
+    const elapsed = Date.now() - start;
+    // Mantener el spinner al menos 400ms para evitar parpadeos
+    if (elapsed < 400) {
+      setTimeout(() => setRefreshing(false), 400 - elapsed);
+    } else {
+      setRefreshing(false);
     }
   };
 
@@ -231,15 +212,16 @@ export default function ChatListScreen() {
               onDelete={() => deleteChat(item.id)}
             />
           )}
-          onScroll={handleScroll}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#ffa500"]}
+              progressBackgroundColor="#f5f5dc"
+            />
+          }
           scrollEventThrottle={16}
         />
-      )}
-      {refreshing && (
-        <View style={styles.refreshingOverlay} pointerEvents="none">
-          <ActivityIndicator size="large" color="#ffa500" />
-          <Text style={styles.refreshingText}>Recargando...</Text>
-        </View>
       )}
       <FAB
         icon="plus"

@@ -1,14 +1,85 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Avatar, Card, Button, Divider } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import { Card, Avatar, Divider, Text, Button } from 'react-native-paper';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { API_URL, useAuth } from '../../context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../../context/AuthContext';
+
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  gymId: string | null;
+}
+
+interface JwtPayload {
+  id: string;
+  email: string;
+  role: string;
+  gymId?: string;
+  exp: number;
+}
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const { onLogout } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await SecureStore.getItemAsync('userToken');
+        if (!token) throw new Error('Token no encontrado.');
+
+        const decoded = jwtDecode<JwtPayload>(token);
+
+        const { data } = await axios.get<User>(`${API_URL}/api/users/${decoded.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUser(data);
+      } catch (err: any) {
+        setError(err.message ?? 'Error al cargar el usuario');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.loader}>
+        <Text style={{ color: 'red' }}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -18,8 +89,8 @@ export default function ProfileScreen() {
           <Icon name="camera" size={20} color="#ffa500" />
           <Text style={styles.changePhotoText}>Cambiar foto</Text>
         </TouchableOpacity>
-        <Text style={styles.userName}>Usuario</Text>
-        <Text style={styles.userEmail}>usuario@ejemplo.com</Text>
+        <Text style={styles.userName}>{user?.name}</Text>
+        <Text style={styles.userEmail}>{user?.email}</Text>
       </View>
 
       <Card style={styles.card}>
@@ -186,5 +257,11 @@ const styles = StyleSheet.create({
   actionButton: {
     marginVertical: 6,
     borderRadius: 8,
+  },
+  loader: {
+    flex: 1,
+    paddingVertical: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -150,10 +150,15 @@ const IAChatListScreen = ({ route }: IAChatListScreenProps) => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Recarga real
+    const start = Date.now();
     await loadChats();
-    // Mantener el spinner visible al menos 1.5 segundos
-    setTimeout(() => setRefreshing(false), 1500);
+    const elapsed = Date.now() - start;
+    // Mantener el spinner al menos 400ms para evitar parpadeos
+    if (elapsed < 400) {
+      setTimeout(() => setRefreshing(false), 400 - elapsed);
+    } else {
+      setRefreshing(false);
+    }
   };
 
   // Detectar scroll al tope superior para recargar
@@ -204,16 +209,15 @@ const IAChatListScreen = ({ route }: IAChatListScreenProps) => {
         keyExtractor={item => item.id}
         renderItem={renderItem}
         ListEmptyComponent={<Text style={styles.empty}>No tienes chats aún.</Text>}
-
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#ffa500"]}
+            progressBackgroundColor="#f5f5dc"
+          />
+        }
       />
-      {refreshing && (
-        <View style={styles.refreshingOverlay} pointerEvents="none">
-          <ActivityIndicator size="large" color="#ffa500" />
-          <Text style={styles.refreshingText}>Recargando...</Text>
-        </View>
-      )}
       <FAB
         icon="plus"
         style={styles.fab}
@@ -262,28 +266,5 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
-  },
-  refreshingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5dc',
-  },
-  refreshingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(245,245,220,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  refreshingText: {
-    marginTop: 16,
-    fontSize: 18,
-    color: '#ffa500',
-    fontWeight: 'bold',
   },
 });

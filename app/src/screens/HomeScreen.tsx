@@ -5,6 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { API_URL } from '../../context/AuthContext';
 
 import HomeClassCard from '../components/HomeClassCard';
 
@@ -30,9 +33,34 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function HomeScreen() {
     const navigation = useNavigation<NavigationProp>();
     const [refreshing, setRefreshing] = useState(false);
+    const [reloadKey, setReloadKey] = useState(0); // Para forzar recarga de clases
     const onRefresh = async () => {
         setRefreshing(true);
-        setTimeout(() => setRefreshing(false), 1500);
+        try {
+            // Refresca el token del usuario antes de recargar las clases
+            const token = await SecureStore.getItemAsync('userToken');
+            if (token) {
+                // Cambia la ruta si tu backend usa otra para devolver el usuario y el nuevo token
+                const { data } = await axios.get(`${API_URL}/api/users/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                // Si el backend devuelve un nuevo token actualizado:
+                if (data.token) {
+                    await SecureStore.setItemAsync('userToken', data.token);
+                }
+            }
+        } catch (e) {
+            // Si falla, sigue con la recarga visual
+        }
+        setReloadKey(prev => prev + 1); // Forzar recarga de clases
+        const start = Date.now();
+        // Mantener el spinner visible al menos 400ms para evitar parpadeos
+        const elapsed = Date.now() - start;
+        if (elapsed < 400) {
+            setTimeout(() => setRefreshing(false), 400 - elapsed);
+        } else {
+            setRefreshing(false);
+        }
     };
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         if (event.nativeEvent.contentOffset.y <= 0 && !refreshing) {
@@ -155,14 +183,21 @@ export default function HomeScreen() {
     return (
         <View style={styles.container}>
             <ScrollView
-                onScroll={handleScroll}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={["#ffa500"]}
+                        progressBackgroundColor="#f5f5dc"
+                    />
+                }
                 scrollEventThrottle={16}
                 contentContainerStyle={{ paddingBottom: 80 }} // Espacio para la barra inferior
             >
                 {renderWorkoutCard()}
                 {renderQuickActions()}
                 {renderStats()}
-                <HomeClassCard />
+                <HomeClassCard reloadTrigger={reloadKey} />
                 <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: 'black' }]}>Nutrición</Text>
                     <Card style={styles.nutritionCard}>
@@ -227,13 +262,6 @@ export default function HomeScreen() {
                     </Card>                
                 </View>
             </ScrollView>
-            
-            {refreshing && (
-                <View style={styles.refreshingOverlay} pointerEvents="none">
-                    <ActivityIndicator size="large" color="#ffa500" />
-                    <Text style={styles.refreshingText}>Recargando...</Text>
-                </View>
-            )}
             
             <FAB
                 icon="plus"
@@ -346,36 +374,4 @@ const styles = StyleSheet.create({
         bottom: 80, // para que no tape la barra
         backgroundColor: '#ffa500',
     },
-    refreshingOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(245,245,220,0.8)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    refreshingText: {
-        marginTop: 16,
-        fontSize: 18,
-        color: '#ffa500',
-        fontWeight: 'bold',
-    },
-    bottomBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 64,
-    backgroundColor: '#b8860b',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    zIndex: 100,
-    elevation: 10,
-},
 });
