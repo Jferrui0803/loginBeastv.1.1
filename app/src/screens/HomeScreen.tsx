@@ -373,5 +373,19 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 80, // para que no tape la barra
         backgroundColor: '#ffa500',
-    },
+    },bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 64,
+    backgroundColor: '#b8860b',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    zIndex: 100,
+    elevation: 10,
+  },
 });
