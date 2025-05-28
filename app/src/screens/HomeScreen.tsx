@@ -156,7 +156,14 @@ export default function HomeScreen() {
     );    return (
         <View style={styles.container}>
             <ScrollView
-                onScroll={handleScroll}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={["#ffa500"]}
+                        progressBackgroundColor="#f5f5dc"
+                    />
+                }
                 scrollEventThrottle={16}
             >
                 {renderWorkoutCard()}
@@ -227,13 +234,6 @@ export default function HomeScreen() {
                     </Card>                
                 </View>
             </ScrollView>
-            
-            {refreshing && (
-                <View style={styles.refreshingOverlay} pointerEvents="none">
-                    <ActivityIndicator size="large" color="#ffa500" />
-                    <Text style={styles.refreshingText}>Recargando...</Text>
-                </View>
-            )}
             
             <FAB
                 icon="plus"
@@ -316,22 +316,5 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         backgroundColor: '#ffa500',
-    },
-    refreshingOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(245,245,220,0.8)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 10,
-    },
-    refreshingText: {
-        marginTop: 16,
-        fontSize: 18,
-        color: '#ffa500',
-        fontWeight: 'bold',
     },
 });
