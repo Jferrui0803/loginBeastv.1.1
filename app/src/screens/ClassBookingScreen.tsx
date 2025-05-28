@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     height: 70,
-    backgroundColor: '#2c3e50',
+    backgroundColor: '#b8860b',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',

@@ -78,9 +78,31 @@ const AppNavigator = () => {
       />
       <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ headerShown: true, title: 'Nutrición' }} />
       <Stack.Screen name="PersonalizedTraining" component={PersonalizedTrainingScreen} options={{ headerShown: true, title: 'Entrenamiento Personalizado' }} />
-      <Stack.Screen name="ClassBooking" component={ClassBookingScreen} />
+      <Stack.Screen 
+          name="ClassBooking" 
+          component={ClassBookingScreen} 
+          options={{ 
+            headerShown: true,
+            title: 'Reservar Clases',
+            headerStyle: {
+              backgroundColor: '#fff',
+            },
+            headerTintColor: '#000',
+          }}
+        />
       <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="Routines" component={RoutinesScreen} />
+      <Stack.Screen 
+        name="Routines" 
+        component={RoutinesScreen} 
+        options={{ 
+          headerShown: true,
+          title: 'Rutinas',
+          headerStyle: {
+            backgroundColor: '#fff',
+          },
+          headerTintColor: '#000',
+        }}
+      />
       <Stack.Screen 
           name="ProgressScreen" 
           component={ProgressScreen} 
@@ -88,7 +110,7 @@ const AppNavigator = () => {
             headerShown: true,
             title: 'Progreso',
             headerStyle: {
-              backgroundColor: '#ffa500',
+              backgroundColor: '#fff',
             },
             headerTintColor: '#000',
           }}

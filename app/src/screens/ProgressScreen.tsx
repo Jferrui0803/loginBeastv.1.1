@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
-import { Surface, SegmentedButtons, Card, DataTable, Button, List, Divider, ProgressBar, Portal, Modal } from 'react-native-paper';
+import { Surface, SegmentedButtons, Card, DataTable, Button, List, Divider, ProgressBar, Portal, Modal, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-
 
 export default function ProgressScreen() {
   const navigation = useNavigation();
@@ -42,12 +41,11 @@ export default function ProgressScreen() {
 
   return (
     <View style={styles.container}>
-
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={{ paddingBottom: 24 }}>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={{ paddingBottom: 80 }}>
         {/* Streak */}
         <Surface style={styles.headerContainer} elevation={2}>
           <View style={styles.streakContainer}>
-            <Icon name="fire" size={28} color="#d2691e" />
+            <Icon name="fire" size={28} color="#ff8c00" />
             <Text style={styles.streakText}>{userStats.streak} días seguidos</Text>
           </View>
         </Surface>
@@ -94,19 +92,19 @@ export default function ProgressScreen() {
         <Surface style={styles.statsContainer} elevation={3}>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Icon name="fire" size={32} color="#d2691e" />
+              <Icon name="fire" size={32} color="#fff" />
               <Text style={styles.statValue}>{userStats.totalCalories}</Text>
               <Text style={styles.statLabel}>Calorías</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Icon name="clock-outline" size={32} color="#d2691e" />
+              <Icon name="clock-outline" size={32} color="#fff" />
               <Text style={styles.statValue}>{userStats.totalHours}h</Text>
               <Text style={styles.statLabel}>Tiempo Total</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Icon name="dumbbell" size={32} color="#d2691e" />
+              <Icon name="dumbbell" size={32} color="#fff" />
               <Text style={styles.statValue}>{userStats.totalWorkouts}</Text>
               <Text style={styles.statLabel}>Entrenamientos</Text>
             </View>
@@ -190,6 +188,34 @@ export default function ProgressScreen() {
           </Card.Content>
         </Card>
       </ScrollView>
+
+      {/* Barra de navegación inferior fija */}
+      <View style={styles.bottomBar}>
+        <IconButton
+          icon="home"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('HomeScreen')}
+        />
+        <IconButton
+          icon="calendar"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('ClassBooking')}
+        />
+        <IconButton
+          icon="chart-line"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('ProgressScreen')}
+        />
+        <IconButton
+          icon="dumbbell"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('Routines')}
+        />
+      </View>
     </View>
   );
 }
@@ -221,7 +247,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     marginVertical: 16,
     paddingVertical: 16,
-    backgroundColor: '#ff8c00',
+    backgroundColor: '#fff',
     elevation: 2,
     borderRadius: 0,
   },
@@ -276,7 +302,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 20,
     padding: 16,
-    backgroundColor: '#ff8c00',
+    backgroundColor: '#ffa500',
     elevation: 3,
     borderRadius: 0,
   },
@@ -325,6 +351,7 @@ const styles = StyleSheet.create({
   viewMoreButton: {
     marginTop: 16,
     borderRadius: 0,
+    backgroundColor: '#ffa500',
   },
   achievementTitle: {
     color: '#000',
@@ -338,5 +365,20 @@ const styles = StyleSheet.create({
   },
   improvement: {
     color: '#228B22',
+  },
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 64,
+    backgroundColor: '#b8860b',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    zIndex: 100,
+    elevation: 10,
   },
 });

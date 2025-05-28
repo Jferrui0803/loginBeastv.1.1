@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type RootStackParamList = {
   HomeScreen: undefined;
   ClassBooking: undefined;
+  ProgressScreen: undefined;
   Routines: undefined;
   IAChatList: { chatType: 'nutrition' | 'training' };
   ChatList: undefined;
@@ -573,7 +574,7 @@ export default function RoutinesScreen() {
           icon="chart-line"
           size={32}
           iconColor="white"
-          onPress={() => alert('Que no está implementado todavía, ansias')}
+          onPress={() => navigation.navigate('ProgressScreen')}
         />
         <IconButton
           icon="dumbbell"

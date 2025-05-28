@@ -193,35 +193,20 @@ export default function HomeScreen() {
                     />
                 }
                 scrollEventThrottle={16}
-                contentContainerStyle={{ paddingBottom: 80 }} // Espacio para la barra inferior
+                contentContainerStyle={{ paddingBottom: 80 }} 
             >
                 {renderWorkoutCard()}
                 {renderQuickActions()}
                 {renderStats()}
                 <HomeClassCard reloadTrigger={reloadKey} />
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: 'black' }]}>Mensajes</Text>
-                    <Card style={styles.nutritionCard}>
-                        <Card.Content>
-                            <Text variant="titleMedium" style={{ color: 'black' }}>Chats</Text>
-                            <Text variant="bodySmall" style={{ color: 'black' }}>Comunícate con otros usuarios</Text>
-                        </Card.Content>
-                        <Card.Actions>
-                            <Button
-                                mode="contained-tonal"
-                                style={{ backgroundColor: '#f5f5dc' }}
-                                textColor="black"
-                                onPress={() => navigation.navigate('ChatList')}
-                            ><Text>Abrir chats</Text></Button>
-                        </Card.Actions>
-                    </Card>                
-                </View>
+                {/* Sección de mensajes eliminada */}
             </ScrollView>
             
+            {/* FAB con icono de mensaje */}
             <FAB
-                icon="plus"
+                icon="message"
                 style={styles.fab}
-                onPress={() => console.log('Agregar nuevo entrenamiento')}
+                onPress={() => navigation.navigate('ChatList')}
             />
 
             {/* Barra de navegación inferior fija */}
@@ -326,21 +311,22 @@ const styles = StyleSheet.create({
         position: 'absolute',
         margin: 16,
         right: 0,
-        bottom: 80, // para que no tape la barra
+        bottom: 80, 
         backgroundColor: '#ffa500',
-    },bottomBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 64,
-    backgroundColor: '#b8860b',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    zIndex: 100,
-    elevation: 10,
-  },
+    },
+    bottomBar: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 64,
+        backgroundColor: '#b8860b',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderColor: '#eee',
+        zIndex: 100,
+        elevation: 10,
+    },
 });
