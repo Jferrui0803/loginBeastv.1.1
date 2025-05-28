@@ -95,7 +95,6 @@ export default function HomeScreen() {
                     style={{ backgroundColor: '#f5f5dc' }}
                     onPress={() => navigation.navigate('WorkoutDetail')}>
                     Ver detalles
-                    
                 </Button>
             </Card.Actions>
         </Card>
