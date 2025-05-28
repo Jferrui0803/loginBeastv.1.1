@@ -9,17 +9,6 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const { onLogout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await onLogout!();
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -99,7 +88,7 @@ export default function ProfileScreen() {
           <Button
             mode="contained-tonal"
             icon="logout"
-            onPress={handleLogout}
+            onPress={onLogout}
             buttonColor="#ffa500"
             textColor="black"
             style={styles.actionButton}
