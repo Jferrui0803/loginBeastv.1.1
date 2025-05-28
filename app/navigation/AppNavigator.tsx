@@ -51,7 +51,7 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer>
-<Stack.Navigator screenOptions={{ headerShown: false }}>
+<Stack.Navigator screenOptions={{ headerShown: true }}>
   {authState?.authenticated ? (
     <>
       <Stack.Screen 
