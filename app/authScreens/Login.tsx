@@ -1,17 +1,18 @@
-import { View, Text, Image, Button, StyleSheet, TextInput } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { TextInput, Button, Text, Surface } from 'react-native-paper';
 import { API_URL, useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { onLogin, onRegister } = useAuth();
-
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
+    const { onLogin, } = useAuth(); 
+    
     useEffect(() => {
         const testCall = async () => {
             const result = await axios.get(`${API_URL}/api/auth/login`);
-
         }
         testCall();
     }, []);
@@ -33,66 +34,98 @@ const Login = () => {
             console.error(error);
         }
     };
-    const register = async () => {
-        try {
-            const result = await onRegister!(email, password);
-            if (result.error) {
-                alert(result.msg);
-            } else {
-                await login();
-            }
-        } catch (error) {
-            if (error instanceof Error) {
-                alert('Error inesperado: ' + error.message);
-            } else {
-                alert('Error inesperado');
-            }
-            console.error(error);
-        }
-    };
+
+
+
     return (
         <View style={styles.container}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0' }} style={styles.image} />
-            <View style={styles.form}>
-                <TextInput style={styles.input} placeholder="Email" onChangeText={(text: string) => setEmail(text)} value={email} />
-                <TextInput style={styles.input} placeholder="Password" secureTextEntry={true} onChangeText={(text: string) => setPassword(text)} value={password} />
-                <Button onPress={login} title="Sign In" />
-                <Button onPress={register} title="Create Account" />
-            </View>
+            <Surface style={styles.formContainer} elevation={2}>
+                <Image 
+                    source={require('../assets/image.png')} 
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
+                <Text style={styles.title}>GYMFIT</Text>
+                <TextInput
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    style={styles.input}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    outlineColor="black"
+                    activeOutlineColor="black"
+                />
+                <TextInput
+                    label="Contraseña"
+                    value={password}
+                    onChangeText={setPassword}
+                    mode="outlined"
+                    style={styles.input}
+                    secureTextEntry={secureTextEntry}
+                    outlineColor="black"
+                    activeOutlineColor="black"
+                    right={
+                        <TextInput.Icon
+                            icon={secureTextEntry ? "eye" : "eye-off"}
+                            onPress={() => setSecureTextEntry(!secureTextEntry)}
+                        />
+                    }
+                />
+                <Button 
+                    mode="contained" 
+                    onPress={login}
+                    style={{ backgroundColor: '#ffa500' }}
+                    textColor="white" 
+                >
+                    Iniciar Sesión
+
+                </Button>
+                    
+
+            </Surface>
         </View>
     );
 };
 
-
-
-
-
-
 const styles = StyleSheet.create({
-    image: {
-        width: '50%',
-        height: '50%',
-        resizeMode: 'contain',
+    container: {
+        flex: 1,
+        padding: 20,
+        justifyContent: 'center',
+        backgroundColor: '#f5f5dc', 
     },
-    form: {
-        gap: 10,
-        width: '60%',
+    formContainer: {
+        padding: 20,
+        borderRadius: 10,
+        backgroundColor: 'white',
+    },
+    logo: {
+        width: 150,
+        height: 150,
+        alignSelf: 'center',
+
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+        marginTop: -20,
+        color: '#333',
     },
     input: {
-        height: 44,
-        borderWidth: 1,
-        borderRadius: 4,
-        padding: 10,
-        backgroundColor: '#fff',
+        marginBottom: 16,
+        backgroundColor: 'white',
     },
-    container: {
-        alignItems: 'center',
-        width: '100%',
-        justifyContent: 'center',
-        top: 30
+    button: {
+        marginTop: 10,
+        paddingVertical: 6,
     },
-
+    linkButton: {
+        marginTop: 10,
+    },
 });
 
 export default Login;
-
