@@ -8,7 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [secureTextEntry, setSecureTextEntry] = useState(true);
-    const { onLogin, } = useAuth(); 
+    const { onLogin } = useAuth(); 
     
     useEffect(() => {
         const testCall = async () => {

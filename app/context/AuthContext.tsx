@@ -13,7 +13,7 @@ interface AuthProps {
 }
 
 const TOKEN_KEY = 'userToken';
-export const API_URL = 'http://192.168.1.33:3000';
+export const API_URL = 'http://172.20.10.2:3000';
 const AuthContext = createContext<AuthProps>({});
 
 export const useAuth = () => {

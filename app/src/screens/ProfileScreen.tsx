@@ -14,6 +14,7 @@ import { jwtDecode } from 'jwt-decode';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
+
 interface User {
   id: string;
   name: string;
@@ -38,18 +39,6 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const handleLogout = async () => {
-    try {
-      await onLogout!();
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
-  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -91,7 +80,7 @@ export default function ProfileScreen() {
       </View>
     );
   }
-  
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.header}>
@@ -155,7 +144,7 @@ export default function ProfileScreen() {
             textColor="black"
             style={styles.actionButton}
           >
-          Editar Perfil 
+            Editar Perfil
           </Button>
           <Button
             mode="contained-tonal"
@@ -170,7 +159,7 @@ export default function ProfileScreen() {
           <Button
             mode="contained-tonal"
             icon="logout"
-            onPress={handleLogout}
+            onPress={onLogout}
             buttonColor="#ffa500"
             textColor="black"
             style={styles.actionButton}
