@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Text, Card, Button, IconButton, Surface, Chip, Portal, Modal, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,7 +8,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 type RootStackParamList = {
   HomeScreen: undefined;
   ClassBooking: undefined;
-  ProgressScreen: undefined;
   Routines: undefined;
   IAChatList: { chatType: 'nutrition' | 'training' };
   ChatList: undefined;
@@ -147,9 +146,10 @@ export default function RoutinesScreen() {
     if (timeLeft > 60) return '#FF9800';  // Naranja
     return '#F44336'; // Rojo
   };
-
   // Funciones para IMC
   const calcularIMC = () => {
+    Keyboard.dismiss(); 
+    
     const pesoNum = parseFloat(peso);
     const alturaNum = parseFloat(altura) / 100; // convertir cm a metros
 
@@ -454,105 +454,109 @@ export default function RoutinesScreen() {
           onDismiss={cerrarModal}
           contentContainerStyle={styles.modalContainer}
         >
-          <Card style={styles.imcCard}>
-            <Card.Title
-              title="Calculadora de IMC"
-              subtitle="Índice de Masa Corporal"
-              titleStyle={{ color: 'black', fontWeight: 'bold' }}
-              subtitleStyle={{ color: '#666' }}
-              left={(props) => <Icon {...props} name="calculator" size={32} color="#ffa500" />}
-              right={(props) => (
-                <IconButton
-                  {...props}
-                  icon="close"
-                  onPress={cerrarModal}
-                  iconColor="#666"
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View>
+              <Card style={styles.imcCard}>
+                <Card.Title
+                  title="Calculadora de IMC"
+                  subtitle="Índice de Masa Corporal"
+                  titleStyle={{ color: 'black', fontWeight: 'bold' }}
+                  subtitleStyle={{ color: '#666' }}
+                  left={(props) => <Icon {...props} name="calculator" size={32} color="#ffa500" />}
+                  right={(props) => (
+                    <IconButton
+                      {...props}
+                      icon="close"
+                      onPress={cerrarModal}
+                      iconColor="#666"
+                    />
+                  )}
                 />
-              )}
-            />
-            
-            <Card.Content>
-              <TextInput
-                label="Peso (kg)"
-                value={peso}
-                onChangeText={setPeso}
-                keyboardType="numeric"
-                mode="outlined"
-                style={styles.inputField}
-                activeOutlineColor="#ffa500"
-                textColor="black"
-                left={<TextInput.Icon icon="weight" iconColor="black" />}
-              />
+                
+                <Card.Content>
+                  <TextInput
+                    label="Peso (kg)"
+                    value={peso}
+                    onChangeText={setPeso}
+                    keyboardType="numeric"
+                    mode="outlined"
+                    style={styles.inputField}
+                    activeOutlineColor="#ffa500"
+                    textColor="black"
+                    left={<TextInput.Icon icon="weight" iconColor="black" />}
+                  />
 
-              <TextInput
-                label="Altura (cm)"
-                value={altura}
-                onChangeText={setAltura}
-                keyboardType="numeric"
-                mode="outlined"
-                style={styles.inputField}
-                activeOutlineColor="#ffa500"
-                textColor="black"
-                left={<TextInput.Icon icon="human-male-height" iconColor="black" />}
-              />
+                  <TextInput
+                    label="Altura (cm)"
+                    value={altura}
+                    onChangeText={setAltura}
+                    keyboardType="numeric"
+                    mode="outlined"
+                    style={styles.inputField}
+                    activeOutlineColor="#ffa500"
+                    textColor="black"
+                    left={<TextInput.Icon icon="human-male-height" iconColor="black" />}
+                  />
 
-              {imc && (
-                <Surface style={[styles.resultadoContainer, { borderLeftColor: getIMCColor() }]} elevation={1}>
-                  <View style={styles.resultadoHeader}>
-                    <Icon name="chart-line" size={32} color="black" />
-                    <View style={styles.resultadoTexto}>
-                      <Text style={[styles.imcValor, { color: 'black' }]}>
-                        IMC: {imc}
-                      </Text>
-                      <Text style={[styles.categoriaTexto, { color: 'black' }]}>
-                        {categoriaIMC}
-                      </Text>
-                    </View>
-                  </View>
-                    
-                    <View style={styles.referenciasContainer}>
-                      <Text style={styles.referenciasTitle}>Referencias:</Text>
-                      <View style={styles.referenciaItem}>
-                        <View style={[styles.colorIndicator, { backgroundColor: '#2196F3' }]} />
-                        <Text style={styles.referenciaTexto}>Bajo peso: &lt; 18.5</Text>
+                  {imc && (
+                    <Surface style={[styles.resultadoContainer, { borderLeftColor: getIMCColor() }]} elevation={1}>
+                      <View style={styles.resultadoHeader}>
+                        <Icon name="chart-line" size={32} color="black" />
+                        <View style={styles.resultadoTexto}>
+                          <Text style={[styles.imcValor, { color: 'black' }]}>
+                            IMC: {imc}
+                          </Text>
+                          <Text style={[styles.categoriaTexto, { color: 'black' }]}>
+                            {categoriaIMC}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.referenciaItem}>
-                        <View style={[styles.colorIndicator, { backgroundColor: '#4CAF50' }]} />
-                        <Text style={styles.referenciaTexto}>Normal: 18.5 - 24.9</Text>
-                      </View>
-                      <View style={styles.referenciaItem}>
-                        <View style={[styles.colorIndicator, { backgroundColor: '#FF9800' }]} />
-                        <Text style={styles.referenciaTexto}>Sobrepeso: 25 - 29.9</Text>
-                      </View>
-                      <View style={styles.referenciaItem}>
-                        <View style={[styles.colorIndicator, { backgroundColor: '#F44336' }]} />
-                        <Text style={styles.referenciaTexto}>Obesidad: ≥ 30</Text>
-                      </View>
-                    </View>
-                  </Surface>
-                )}
-              </Card.Content>
-              
-              <Card.Actions style={styles.modalActions}>
-                <Button
-                  mode="outlined"
-                  onPress={resetearCalculadora}
-                  style={styles.actionButton}
-                  textColor="#666"
-                >
-                  Limpiar
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={calcularIMC}
-                  style={[styles.actionButton, { backgroundColor: '#ffa500' }]}
-                  textColor="white"
-                  icon={() => <Icon name="calculator" size={20} color="white" />}
-                >
-                  Calcular
-                </Button>
-              </Card.Actions>
-            </Card>
+                        
+                        <View style={styles.referenciasContainer}>
+                          <Text style={styles.referenciasTitle}>Referencias:</Text>
+                          <View style={styles.referenciaItem}>
+                            <View style={[styles.colorIndicator, { backgroundColor: '#2196F3' }]} />
+                            <Text style={styles.referenciaTexto}>Bajo peso: &lt; 18.5</Text>
+                          </View>
+                          <View style={styles.referenciaItem}>
+                            <View style={[styles.colorIndicator, { backgroundColor: '#4CAF50' }]} />
+                            <Text style={styles.referenciaTexto}>Normal: 18.5 - 24.9</Text>
+                          </View>
+                          <View style={styles.referenciaItem}>
+                            <View style={[styles.colorIndicator, { backgroundColor: '#FF9800' }]} />
+                            <Text style={styles.referenciaTexto}>Sobrepeso: 25 - 29.9</Text>
+                          </View>
+                          <View style={styles.referenciaItem}>
+                            <View style={[styles.colorIndicator, { backgroundColor: '#F44336' }]} />
+                            <Text style={styles.referenciaTexto}>Obesidad: ≥ 30</Text>
+                          </View>
+                        </View>
+                      </Surface>
+                    )}
+                </Card.Content>
+                
+                <Card.Actions style={styles.modalActions}>
+                  <Button
+                    mode="outlined"
+                    onPress={resetearCalculadora}
+                    style={styles.actionButton}
+                    textColor="#666"
+                  >
+                    Limpiar
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={calcularIMC}
+                    style={[styles.actionButton, { backgroundColor: '#ffa500' }]}
+                    textColor="white"
+                    icon={() => <Icon name="calculator" size={20} color="white" />}
+                  >
+                    Calcular
+                  </Button>
+                </Card.Actions>
+              </Card>
+            </View>
+          </TouchableWithoutFeedback>
         </Modal>
       </Portal>
 
@@ -574,7 +578,7 @@ export default function RoutinesScreen() {
           icon="chart-line"
           size={32}
           iconColor="white"
-          onPress={() => navigation.navigate('ProgressScreen')}
+          onPress={() => alert('Que no está implementado todavía, ansias')}
         />
         <IconButton
           icon="dumbbell"
