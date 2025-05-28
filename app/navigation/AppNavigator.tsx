@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext';
 /*Imports de las pantallas*/
 import HomeScreen from '../src/screens/HomeScreen'
 import ClassBookingScreen from '../src/screens/ClassBookingScreen';
-import GymMapScreen from '../src/screens/GymMapScreen';
 import ProfileScreen from '../src/screens/ProfileScreen';
 import ProgressScreen from '../src/screens/ProgressScreen';
 import RoutinesScreen from '../src/screens/RoutinesScreen';
@@ -34,6 +33,7 @@ type MainStackParamList = {
   Nutrition: undefined;
   PersonalizedTraining: undefined;
   ClassBooking: undefined;
+  ProgressScreen: undefined;
   GymMap: undefined;
   Profile: undefined;
   Routines: undefined;
@@ -79,9 +79,20 @@ const AppNavigator = () => {
       <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ headerShown: true, title: 'Nutrición' }} />
       <Stack.Screen name="PersonalizedTraining" component={PersonalizedTrainingScreen} options={{ headerShown: true, title: 'Entrenamiento Personalizado' }} />
       <Stack.Screen name="ClassBooking" component={ClassBookingScreen} />
-      <Stack.Screen name="GymMap" component={GymMapScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Routines" component={RoutinesScreen} />
+      <Stack.Screen 
+          name="ProgressScreen" 
+          component={ProgressScreen} 
+          options={{ 
+            headerShown: true,
+            title: 'Progreso',
+            headerStyle: {
+              backgroundColor: '#ffa500',
+            },
+            headerTintColor: '#000',
+          }}
+        />
       <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
       {/* IA Chat Screens */}
       <Stack.Screen 

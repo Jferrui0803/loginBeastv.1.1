@@ -34,7 +34,6 @@ export default function ClassBookingScreen() {
   const [error, setError] = useState<string | null>(null);
   const [reserving, setReserving] = useState<string | null>(null);
 
-
   const fetchClases = async () => {
     try {
       setLoading(true);
@@ -80,7 +79,8 @@ export default function ClassBookingScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#ffa500" />
+        <ActivityIndicator size="large" color="#ff6b35" />
+        <Text style={styles.loadingText}>Cargando clases...</Text>
       </View>
     );
   }
@@ -88,69 +88,83 @@ export default function ClassBookingScreen() {
   if (error) {
     return (
       <View style={styles.loader}>
-        <Text style={{ color: 'red' }}>{error}</Text>
-        <Button onPress={fetchClases}>Reintentar</Button>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button 
+          mode="contained" 
+          onPress={fetchClases}
+          style={styles.retryButton}
+          textColor="#ffffff"
+        >
+          Reintentar
+        </Button>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}>
-        <Text style={styles.headerTitle}>Reserva tu clase</Text>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollContainer} 
+        contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}
+      >
+        <Text style={styles.headerTitle}>RESERVA TU CLASE</Text>
+        
         {clases.map((clase) => {
           const hora = new Date(clase.startTime).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
           });
           return (
-            <Surface key={clase.id} style={styles.surface} elevation={4}>
-              <Card style={styles.classCard}>
-                <Card.Title
-                  title={clase.name}
-                  titleStyle={styles.className}
-                  subtitle={`Instructor: ${clase.instructor}`}
-                  subtitleStyle={styles.instructor}
-                  left={() => (
-                    <Avatar.Icon
-                      size={48}
-                      icon="dumbbell"
-                      style={{ backgroundColor: '#b8860b' }}
-                      color="#fff"
-                    />
-                  )}
-                />
-                <Card.Content>
+            <View key={clase.id} style={styles.classCardContainer}>
+              <View style={styles.classCard}>
+                <View style={styles.cardHeader}>
+                  <Avatar.Icon
+                    size={56}
+                    icon="dumbbell"
+                    style={styles.avatar}
+                    color="#ffffff"
+                  />
+                  <View style={styles.titleContainer}>
+                    <Text style={styles.className}>{clase.name.toUpperCase()}</Text>
+                    <Text style={styles.instructor}>Instructor: {clase.instructor}</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.cardContent}>
                   <View style={styles.infoRow}>
-                    <Icon name="clock-outline" size={22} color="#ffa500" />
+                    <Icon name="clock-outline" size={24} color="#ff6b35" />
                     <Text style={styles.infoText}>Hora: {hora}</Text>
                   </View>
                   <View style={styles.infoRow}>
-                    <Icon name="map-marker" size={22} color="#ffa500" />
+                    <Icon name="map-marker" size={24} color="#ff6b35" />
                     <Text style={styles.infoText}>Gimnasio: {clase.gym.name}</Text>
                   </View>
-                </Card.Content>
-                <Card.Actions>
+                </View>
+                
+                <View style={styles.cardActions}>
                   <Button
                     mode="contained"
                     style={styles.reserveButton}
                     loading={reserving === clase.id}
                     disabled={reserving === clase.id}
                     onPress={() => reservarClase(clase.id)}
-                    icon={() => <Icon name="calendar-check" size={20} color="#fff" />}
-                    textColor="#fff"
+                    textColor="#ffffff"
+                    icon={() => <Icon name="calendar-check" size={20} color="#ffffff" />}
                   >
-                    Reservar
+                    {reserving === clase.id ? 'RESERVANDO...' : 'RESERVAR AHORA'}
                   </Button>
-                </Card.Actions>
-              </Card>
-            </Surface>
+                </View>
+              </View>
+            </View>
           );
         })}
+        
         {!clases.length && (
-          <Text style={{ textAlign: 'center', marginTop: 32, color: '#b8860b', fontWeight: 'bold' }}>
-            No hay clases disponibles.
-          </Text>
+          <View style={styles.emptyContainer}>
+            <Icon name="calendar-remove" size={64} color="#cccccc" />
+            <Text style={styles.emptyText}>NO HAY CLASES DISPONIBLES</Text>
+            <Text style={styles.emptySubtext}>Consulta más tarde o contacta con el gimnasio</Text>
+          </View>
         )}
       </ScrollView>
 
@@ -188,77 +202,141 @@ export default function ClassBookingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#232323',
-    paddingHorizontal: 8,
+    backgroundColor: '#f8f9fa', // Fondo claro profesional
+  },
+  scrollContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#232323',
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '600',
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 24,
+    fontWeight: '600',
+  },
+  retryButton: {
+    backgroundColor: '#ff6b35',
+    paddingHorizontal: 24,
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: 'bold',
-    color: '#ffa500',
-    marginBottom: 24,
+    fontWeight: '900',
+    color: '#2c3e50',
+    marginBottom: 32,
     textAlign: 'center',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
-  surface: {
-    borderRadius: 18,
-    marginHorizontal: 8,
-    marginBottom: 24,
-    backgroundColor: '#2d2d2d',
-    elevation: 4,
+  classCardContainer: {
+    marginBottom: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 0,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff6b35',
   },
   classCard: {
-    backgroundColor: 'transparent',
-    borderRadius: 18,
-    overflow: 'hidden',
+    padding: 20,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  avatar: {
+    backgroundColor: '#ff6b35',
+    marginRight: 16,
+  },
+  titleContainer: {
+    flex: 1,
   },
   className: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ffa500',
-    letterSpacing: 0.5,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#2c3e50',
+    letterSpacing: 1,
+    marginBottom: 4,
   },
   instructor: {
-    color: '#fff',
+    color: '#666666',
     fontSize: 15,
-    marginTop: 2,
+    fontWeight: '500',
+  },
+  cardContent: {
+    marginBottom: 20,
   },
   infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 2,
+    marginBottom: 12,
+    paddingVertical: 4,
   },
   infoText: {
-    color: '#fff',
+    color: '#2c3e50',
     fontSize: 16,
-    marginLeft: 8,
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+  cardActions: {
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    paddingTop: 16,
   },
   reserveButton: {
-    backgroundColor: '#ffa500',
-    marginTop: 12,
-    borderRadius: 8,
-    flex: 1,
+    backgroundColor: '#ff6b35',
+    paddingVertical: 8,
+    borderRadius: 0,
     elevation: 2,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 64,
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#666666',
+    marginTop: 16,
+    textAlign: 'center',
+    letterSpacing: 1,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#999999',
+    marginTop: 8,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   bottomBar: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 64,
-    backgroundColor: '#b8860b',
+    height: 70,
+    backgroundColor: '#2c3e50',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    zIndex: 100,
+    borderTopWidth: 3,
+    borderColor: '#ff6b35',
     elevation: 10,
   },
 });

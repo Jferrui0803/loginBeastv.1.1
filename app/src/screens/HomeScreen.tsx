@@ -15,6 +15,7 @@ type RootStackParamList = {
     Login: undefined;
     Register: undefined;
     HomeScreen: undefined;
+    ProgressScreen: undefined;
     Profile: undefined;
     GymMap: undefined;
     WorkoutDetail: undefined;
@@ -143,7 +144,7 @@ export default function HomeScreen() {
                 icon="chart-line"
                 style={styles.actionButton}
                 textColor="black"
-                onPress={() => alert('Que no está implementado todavía, ansias')}>
+                onPress={() => navigation.navigate('ProgressScreen')}>  
                 Progreso
             </Button>
             <Button
@@ -199,52 +200,6 @@ export default function HomeScreen() {
                 {renderStats()}
                 <HomeClassCard reloadTrigger={reloadKey} />
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: 'black' }]}>Nutrición</Text>
-                    <Card style={styles.nutritionCard}>
-                        <Card.Content>
-                            <Text variant="titleMedium" style={{ color: 'black' }}>
-                                Plan alimenticio personalizado
-                            </Text>
-                            <Text variant="bodySmall" style={{ color: 'black' }}>
-                                Alcanza tus objetivos con una dieta equilibrada
-                            </Text>
-                        </Card.Content>
-                        <Card.Actions>
-                            <Button
-                                mode="contained-tonal"
-                                style={{ backgroundColor: '#f5f5dc' }}
-                                textColor="black"
-                                onPress={() => navigation.navigate('IAChatList', { chatType: 'nutrition' })}
-                            >
-                                Ver plan
-                            </Button>
-                        </Card.Actions>
-                    </Card>
-                </View>
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: 'black' }]}>Entrenamiento personalizado</Text>
-                    <Card style={styles.nutritionCard}>
-                        <Card.Content>
-                            <Text variant="titleMedium" style={{ color: 'black' }}>
-                                Plan de entrenamiento personalizado
-                            </Text>
-                            <Text variant="bodySmall" style={{ color: 'black' }}>
-                                Diseña tu entrenamiento basado en tu anatomía
-                            </Text>
-                        </Card.Content>
-                        <Card.Actions>
-                            <Button
-                                mode="contained-tonal"
-                                style={{ backgroundColor: '#f5f5dc' }}
-                                textColor="black"
-                                onPress={() => navigation.navigate('IAChatList', { chatType: 'training' })}
-                            >
-                                Ver plan
-                            </Button>
-                        </Card.Actions>
-                    </Card>
-                </View>
-                <View style={styles.section}>
                     <Text style={[styles.sectionTitle, { color: 'black' }]}>Mensajes</Text>
                     <Card style={styles.nutritionCard}>
                         <Card.Content>
@@ -287,7 +242,7 @@ export default function HomeScreen() {
                     icon="chart-line"
                     size={32}
                     iconColor="white"
-                    onPress={() => alert('Que no está implementado todavía, ansias')}
+                    onPress={() => navigation.navigate('ProgressScreen')}
                 />
                 <IconButton
                     icon="dumbbell"
