@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Card, Chip, Button, Surface, Searchbar, FAB, Portal, Modal, SegmentedButtons } from 'react-native-paper';
+import { Text, Card, Chip, Button, Surface, Searchbar, FAB, Portal, Modal, SegmentedButtons, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  Home: undefined;
-  Profile: undefined;
-  WorkoutDetail: undefined;
+  HomeScreen: undefined;
+  ClassBooking: undefined;
+  Routines: undefined;
+
 };
 
 const routines = [
@@ -41,7 +40,7 @@ export default function RoutinesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedRoutine, setSelectedRoutine] = useState(null);
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const renderRoutineCard = (routine) => (
     <Card style={styles.routineCard} key={routine.id}>
@@ -85,7 +84,6 @@ export default function RoutinesScreen() {
         >
           Ver detalles
         </Button>
-        
       </Card.Actions>
     </Card>
   );
@@ -120,7 +118,7 @@ export default function RoutinesScreen() {
         }}
       />
 
-      <ScrollView style={styles.scrollView}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 90 }}>
         {routines.map(renderRoutineCard)}
       </ScrollView>
 
@@ -181,6 +179,34 @@ export default function RoutinesScreen() {
         style={styles.fab}
         onPress={() => console.log('Crear nueva rutina')}
       />
+
+      {/* Barra de navegación inferior fija */}
+      <View style={styles.bottomBar}>
+        <IconButton
+          icon="home"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('HomeScreen')}
+        />
+        <IconButton
+          icon="calendar"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('ClassBooking')}
+        />
+        <IconButton
+          icon="chart-line"
+          size={32}
+          iconColor="white"
+          onPress={() => alert('Que no está implementado todavía, ansias')}
+        />
+        <IconButton
+          icon="dumbbell"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('Routines')}
+        />
+      </View>
     </View>
   );
 }
@@ -277,7 +303,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     margin: 16,
     right: 0,
-    bottom: 0,
+    bottom: 80,
     backgroundColor: '#ffa500',
+  },
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 64,
+    backgroundColor: '#b8860b',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    zIndex: 100,
+    elevation: 10,
   },
 });

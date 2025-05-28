@@ -11,7 +11,7 @@ import HomeClassCard from '../components/HomeClassCard';
 type RootStackParamList = {
     Login: undefined;
     Register: undefined;
-    Home: undefined;
+    HomeScreen: undefined;
     Profile: undefined;
     GymMap: undefined;
     WorkoutDetail: undefined;
@@ -247,7 +247,7 @@ export default function HomeScreen() {
                     icon="home"
                     size={32}
                     iconColor="white"
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.navigate('HomeScreen')}
                 />
                 <IconButton
                     icon="calendar"

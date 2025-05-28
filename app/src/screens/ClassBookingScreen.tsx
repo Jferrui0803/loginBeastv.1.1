@@ -1,256 +1,186 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { Card, Text, Chip, Button, Surface, Searchbar, Portal, Modal, Divider } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { Card, Text, Button, Surface, Avatar, IconButton } from 'react-native-paper';
+import axios from 'axios';
+import * as SecureStore from 'expo-secure-store';
+import { API_URL } from '../../context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-type ClassType = {
+interface Clase {
   id: string;
   name: string;
+  startTime: string;
   instructor: string;
-  time: string;
-  duration: string;
-  room: string;
-  capacity: number;
-  available: number;
-  level: string;
-  calories: string;
+  gym: { id: string; name: string };
+}
+
+type RootStackParamList = {
+  HomeScreen: undefined;
+  ClassBooking: undefined;
+  Routines: undefined;
 };
 
-const classes: ClassType[] = [
-  {
-    id: '1',
-    name: 'Yoga',
-    instructor: 'Ana García',
-    time: '10:00',
-    duration: '60 min',
-    room: 'Sala 1',
-    capacity: 20,
-    available: 8,
-    level: 'Todos los niveles',
-    calories: '150-200 kcal'
-  },
-  {
-    id: '2',
-    name: 'CrossFit',
-    instructor: 'Carlos Ruiz',
-    time: '11:30',
-    duration: '45 min',
-    room: 'Sala CrossFit',
-    capacity: 15,
-    available: 5,
-    level: 'Intermedio',
-    calories: '400-600 kcal'
-  },
-    {
-        id: '3',
-        name: 'Zumba',
-        instructor: 'Laura Martínez',
-        time: '12:30',
-        duration: '60 min',
-        room: 'Sala 2',
-        capacity: 25,
-        available: 0,
-        level: 'Principiante',
-        calories: '300-400 kcal'
-    },
-    {
-        id: '4',
-        name: 'Pilates',
-        instructor: 'Sofía López',
-        time: '14:00',
-        duration: '60 min',
-        room: 'Sala 3',
-        capacity: 20,
-        available: 10,
-        level: 'Todos los niveles',
-        calories: '200-300 kcal'
-    },
-];
+interface JwtPayload {
+  gymId: string;
+}
 
 export default function ClassBookingScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClass, setSelectedClass] = useState<ClassType | null>(null);
-  const [visible, setVisible] = useState(false);
-  
-  const showModal = (classItem: ClassType) => {
-    setSelectedClass(classItem);
-    setVisible(true);
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [clases, setClases] = useState<Clase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reserving, setReserving] = useState<string | null>(null);
+
+
+  const fetchClases = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const token = await SecureStore.getItemAsync('userToken');
+      if (!token) throw new Error('Token no encontrado.');
+      const decoded = jwtDecode<JwtPayload>(token);
+      const gymId = decoded.gymId;
+      if (!gymId) throw new Error('gymId no presente en el token.');
+      const { data } = await axios.get<Clase[]>(`${API_URL}/api/classes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const clasesDelGimnasio = data.filter((clase) => clase.gym.id === gymId);
+      setClases(clasesDelGimnasio);
+    } catch (err: any) {
+      setError(err.message ?? 'Error al cargar clases');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const hideModal = () => {
-    setVisible(false);
-    setSelectedClass(null);
+  useEffect(() => {
+    fetchClases();
+  }, []);
+
+  const reservarClase = async (claseId: string) => {
+    try {
+      setReserving(claseId);
+      const token = await SecureStore.getItemAsync('userToken');
+      await axios.post(
+        `${API_URL}/api/classes/${claseId}/reserve`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert('Reserva realizada con éxito');
+    } catch (err: any) {
+      alert(err?.response?.data?.msg || 'Error al reservar la clase');
+    } finally {
+      setReserving(null);
+    }
   };
 
-  const onChangeSearch = (query: string) => setSearchQuery(query);
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#ffa500" />
+      </View>
+    );
+  }
 
-  const filteredClasses = classes.filter(classItem =>
-    classItem.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    classItem.instructor.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-const renderClassCard = (classItem: ClassType) => (
-    <Card style={styles.classCard} key={classItem.id}>
-        <Card.Content>
-            <View style={styles.classHeader}>
-            <View>
-                <Text variant="titleLarge" style={{ color: 'black' }}>{classItem.name}</Text>
-                <Text variant="bodyMedium" style={{ color: 'black' }}>{classItem.instructor}</Text>
-            </View>
-            <Surface style={styles.timeBadge} elevation={2}>
-                <Text style={[styles.timeText, { color: 'black' }]}>{classItem.time}</Text>
-            </Surface>
-            </View>
-            
-            <View style={styles.chipContainer}>
-            <Chip 
-                icon={() => <Icon name="clock" size={20} color="black" />} 
-                style={[styles.chip, { backgroundColor: '#f5f5dc' }]} 
-                textStyle={{ color: 'black' }}
-            >
-                {classItem.duration}
-            </Chip>
-            <Chip 
-                icon={() => <Icon name="account-group" size={20} color="black" />} 
-                style={[styles.chip, { backgroundColor: '#f5f5dc' }]} 
-                textStyle={{ color: 'black' }}
-            >
-                {classItem.available}/{classItem.capacity}
-            </Chip>
-            <Chip 
-                icon={() => <Icon name="room-service" size={20} color="black" />} 
-                style={[styles.chip, { backgroundColor: '#f5f5dc' }]} 
-                textStyle={{ color: 'black' }}
-            >
-                {classItem.room}
-            </Chip>
-            </View>
-        </Card.Content>
-        <Card.Actions>
-            <Button 
-                mode="contained"
-                onPress={() => showModal(classItem)}
-                disabled={classItem.available === 0}
-                style={{ backgroundColor: classItem.available > 0 ? '#f5f5dc' : 'red' }}
-                textColor={classItem.available > 0 ? 'black' : 'white'}
-            >
-                {classItem.available > 0 ? 'Reservar' : 'Completo'}
-            </Button>
-        </Card.Actions>
-    </Card>
-);
+  if (error) {
+    return (
+      <View style={styles.loader}>
+        <Text style={{ color: 'red' }}>{error}</Text>
+        <Button onPress={fetchClases}>Reintentar</Button>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Searchbar
-        placeholder="Buscar clases o instructores"
-        onChangeText={onChangeSearch}
-        value={searchQuery}
-        style={styles.searchbar}
-      />
-      
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.filterChips}>
-          <Chip 
-            selected 
-            onPress={() => {}} 
-            style={[styles.filterChip, { backgroundColor: 'red' }]}
-            textStyle={{ color: 'white' }}
-          >
-            Hoy
-          </Chip>
-          <Chip 
-            onPress={() => {}} 
-            style={[styles.filterChip, { backgroundColor: 'red' }]}
-            textStyle={{ color: 'white' }}
-          >
-            Mañana
-          </Chip>
-          <Chip 
-            onPress={() => {}} 
-            style={[styles.filterChip, { backgroundColor: 'red' }]}
-            textStyle={{ color: 'white' }}
-          >
-            Esta semana
-          </Chip>
-        </View>
-
-        {filteredClasses.map(renderClassCard)}
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}>
+        <Text style={styles.headerTitle}>Reserva tu clase</Text>
+        {clases.map((clase) => {
+          const hora = new Date(clase.startTime).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+          return (
+            <Surface key={clase.id} style={styles.surface} elevation={4}>
+              <Card style={styles.classCard}>
+                <Card.Title
+                  title={clase.name}
+                  titleStyle={styles.className}
+                  subtitle={`Instructor: ${clase.instructor}`}
+                  subtitleStyle={styles.instructor}
+                  left={() => (
+                    <Avatar.Icon
+                      size={48}
+                      icon="dumbbell"
+                      style={{ backgroundColor: '#b8860b' }}
+                      color="#fff"
+                    />
+                  )}
+                />
+                <Card.Content>
+                  <View style={styles.infoRow}>
+                    <Icon name="clock-outline" size={22} color="#ffa500" />
+                    <Text style={styles.infoText}>Hora: {hora}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Icon name="map-marker" size={22} color="#ffa500" />
+                    <Text style={styles.infoText}>Gimnasio: {clase.gym.name}</Text>
+                  </View>
+                </Card.Content>
+                <Card.Actions>
+                  <Button
+                    mode="contained"
+                    style={styles.reserveButton}
+                    loading={reserving === clase.id}
+                    disabled={reserving === clase.id}
+                    onPress={() => reservarClase(clase.id)}
+                    icon={() => <Icon name="calendar-check" size={20} color="#fff" />}
+                    textColor="#fff"
+                  >
+                    Reservar
+                  </Button>
+                </Card.Actions>
+              </Card>
+            </Surface>
+          );
+        })}
+        {!clases.length && (
+          <Text style={{ textAlign: 'center', marginTop: 32, color: '#b8860b', fontWeight: 'bold' }}>
+            No hay clases disponibles.
+          </Text>
+        )}
       </ScrollView>
 
-      <Portal>
-        <Modal 
-          visible={visible} 
-          onDismiss={hideModal} 
-          contentContainerStyle={styles.modalContent}
-        >
-          {selectedClass && (
-            <Surface style={styles.modalSurface}>
-                <Text variant="headlineMedium" style={{ color: 'black' }}>{selectedClass.name}</Text>
-                <Divider style={styles.divider} />
-                
-                <View style={styles.modalInfo}>
-                    <Icon name="account" size={24} color="black" />
-                    <Text variant="bodyLarge" style={[styles.modalText, { color: 'black' }]}>
-                    Instructor: {selectedClass.instructor}
-                    </Text>
-                </View>
-                
-                <View style={styles.modalInfo}>
-                    <Icon name="clock-outline" size={24} color="black" />
-                    <Text variant="bodyLarge" style={[styles.modalText, { color: 'black' }]}>
-                    Horario: {selectedClass.time} ({selectedClass.duration})
-                    </Text>
-                </View>
-
-                <View style={styles.modalInfo}>
-                    <Icon name="fire" size={24} color="black" />
-                    <Text variant="bodyLarge" style={[styles.modalText, { color: 'black' }]}>
-                    Calorías estimadas: {selectedClass.calories}
-                    </Text>
-                </View>
-
-                <View style={styles.modalInfo}>
-                    <Icon name="stairs" size={24} color="black" />
-                    <Text variant="bodyLarge" style={[styles.modalText, { color: 'black' }]}>
-                    Nivel: {selectedClass.level}
-                    </Text>
-                </View>
-
-                <View style={styles.modalInfo}>
-                    <Icon name="information" size={24} color="black" />
-                    <Text variant="bodyMedium" style={[styles.modalText, { color: 'black' }]}>
-                    Plazas disponibles: {selectedClass.available} de {selectedClass.capacity}
-                    </Text>
-                </View>
-
-                <Divider style={styles.divider} />
-                
-                <Button 
-                    mode="contained"
-                    onPress={() => {
-                    console.log(`Reservando clase de ${selectedClass.name}`);
-                    hideModal();
-                    }}
-                    style={[styles.modalButton, { backgroundColor: '#ffa500' }]}
-                    textColor="black"
-                >
-                    Confirmar Reserva
-                </Button>
-                
-                <Button 
-                    mode="outlined"
-                    onPress={hideModal}
-                    style={[styles.modalButton, { borderColor: '#ffa500' }]}
-                    textColor="black"
-                >
-                    Cancelar
-                </Button>
-                </Surface>
-          )}
-        </Modal>
-      </Portal>
+      {/* Barra de navegación inferior fija */}
+      <View style={styles.bottomBar}>
+        <IconButton
+          icon="home"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('HomeScreen')}
+        />
+        <IconButton
+          icon="calendar"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('ClassBooking')}
+        />
+        <IconButton
+          icon="chart-line"
+          size={32}
+          iconColor="white"
+          onPress={() => alert('Que no está implementado todavía, ansias')}
+        />
+        <IconButton
+          icon="dumbbell"
+          size={32}
+          iconColor="white"
+          onPress={() => navigation.navigate('Routines')}
+        />
+      </View>
     </View>
   );
 }
@@ -258,75 +188,77 @@ const renderClassCard = (classItem: ClassType) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5dc', 
+    backgroundColor: '#232323',
+    paddingHorizontal: 8,
   },
-  searchbar: {
-    margin: 16,
-    elevation: 2,
-    backgroundColor:   '#ffa500',
-  },
-  scrollView: {
+  loader: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#232323',
   },
-  filterChips: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    marginBottom: 16,
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffa500',
+    marginBottom: 24,
+    textAlign: 'center',
+    letterSpacing: 1,
   },
-  filterChip: {
-    marginRight: 8,
+  surface: {
+    borderRadius: 18,
+    marginHorizontal: 8,
+    marginBottom: 24,
+    backgroundColor: '#2d2d2d',
+    elevation: 4,
   },
   classCard: {
-    margin: 16,
-    marginTop: 0,
-    elevation: 2,
-    backgroundColor:   '#ffa500',
+    backgroundColor: 'transparent',
+    borderRadius: 18,
+    overflow: 'hidden',
   },
-  classHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-  },
-  timeBadge: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#e3f2fd',
-  },
-  timeText: {
+  className: {
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#1976d2',
+    color: '#ffa500',
+    letterSpacing: 0.5,
   },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
+  instructor: {
+    color: '#fff',
+    fontSize: 15,
+    marginTop: 2,
   },
-  chip: {
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  modalContent: {
-    padding: 20,
-  },
-  modalSurface: {
-    padding: 24,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-  },
-  modalInfo: {
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
-  },
-  modalText: {
-    marginLeft: 12,
-    color: 'black',
-  },
-  divider: {
-    marginVertical: 16,
-  },
-  modalButton: {
     marginTop: 8,
+    marginBottom: 2,
+  },
+  infoText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  reserveButton: {
+    backgroundColor: '#ffa500',
+    marginTop: 12,
+    borderRadius: 8,
+    flex: 1,
+    elevation: 2,
+  },
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 64,
+    backgroundColor: '#b8860b',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#eee',
+    zIndex: 100,
+    elevation: 10,
   },
 });
