@@ -147,7 +147,8 @@ const AppNavigator = () => {
             <Stack.Screen name="IAChatDetail" component={IAChatDetailScreen} options={({ route }) => ({ headerShown: true, title: route.params.chatTitle })} />
           </>
         ) : (
-          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Login" component={Login}
+          options={{ headerShown: false }} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
