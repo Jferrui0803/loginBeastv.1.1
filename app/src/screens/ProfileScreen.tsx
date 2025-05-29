@@ -90,7 +90,7 @@ export default function ProfileScreen() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images', // Valor correcto para evitar warning y error
+      mediaTypes: 'images', 
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -161,9 +161,6 @@ export default function ProfileScreen() {
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Mi perfil</Text>
             <Text style={styles.headerSubtitle}>Información personal y estadísticas</Text>
-          </View>
-          <View style={styles.headerIcon}>
-            <Icon name="account-circle" size={32} color="#ffa500" />
           </View>
         </View>
 
