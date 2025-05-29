@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { TextInput, Button, Text, Surface } from 'react-native-paper';
 import { API_URL, useAuth } from '../context/AuthContext';
@@ -35,57 +35,63 @@ const Login = () => {
         }
     };
 
-
-
     return (
-        <View style={styles.container}>
-            <Surface style={styles.formContainer} elevation={2}>
-                <Image 
-                    source={require('../assets/image.png')} 
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-                <Text style={styles.title}>GYMFIT</Text>
-                <TextInput
-                    label="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
-                    style={styles.input}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    outlineColor="black"
-                    activeOutlineColor="black"
-                />
-                <TextInput
-                    label="Contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    mode="outlined"
-                    style={styles.input}
-                    secureTextEntry={secureTextEntry}
-                    outlineColor="black"
-                    activeOutlineColor="black"
-                    right={
-                        <TextInput.Icon
-                            icon={secureTextEntry ? "eye" : "eye-off"}
-                            onPress={() => setSecureTextEntry(!secureTextEntry)}
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={40}
+        >
+            <ScrollView
+                contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.container}>
+                    <Surface style={styles.formContainer} elevation={2}>
+                        <Image 
+                            source={require('../assets/image.png')} 
+                            style={styles.logo}
+                            resizeMode="contain"
                         />
-                    }
-                />
-                <Button 
-                    mode="contained" 
-                    onPress={login}
-                    style={{ backgroundColor: '#ffa500' }}
-                    textColor="white" 
-                >
-                    Iniciar Sesión
-
-                </Button>
-                    
-
-            </Surface>
-        </View>
+                        <Text style={styles.title}>GYMFIT</Text>
+                        <TextInput
+                            label="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                            mode="outlined"
+                            style={styles.input}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            outlineColor="black"
+                            activeOutlineColor="black"
+                        />
+                        <TextInput
+                            label="Contraseña"
+                            value={password}
+                            onChangeText={setPassword}
+                            mode="outlined"
+                            style={styles.input}
+                            secureTextEntry={secureTextEntry}
+                            outlineColor="black"
+                            activeOutlineColor="black"
+                            right={
+                                <TextInput.Icon
+                                    icon={secureTextEntry ? "eye" : "eye-off"}
+                                    onPress={() => setSecureTextEntry(!secureTextEntry)}
+                                />
+                            }
+                        />
+                        <Button 
+                            mode="contained" 
+                            onPress={login}
+                            style={{ backgroundColor: '#ffa500' }}
+                            textColor="white" 
+                        >
+                            Iniciar Sesión
+                        </Button>
+                    </Surface>
+                </View>
+            </ScrollView>
+        </KeyboardAvoidingView>
     );
 };
 
