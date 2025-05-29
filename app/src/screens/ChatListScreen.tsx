@@ -5,6 +5,8 @@ import axios from 'axios';
 import { API_URL } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import io from 'socket.io-client';
+import { useAuth } from '../../context/AuthContext';
 
 // Define navigation params same as in HomeScreen
 type RootStackParamList = {
@@ -156,9 +158,29 @@ export default function ChatListScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProp>();
+  const { authState } = useAuth();
+
   useEffect(() => {
     loadChats();
   }, []);
+
+  useEffect(() => {
+    if (!authState?.userId || !authState?.token) return;
+    const socket = io(API_URL, {
+      auth: { token: authState.token }
+    });
+    socket.emit('join-user', authState.userId);
+    socket.on('receive-message', (message) => {
+      setChats(prevChats => prevChats.map(chat =>
+        chat.id === message.chatId
+          ? { ...chat, lastMessage: message.content }
+          : chat
+      ));
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [authState?.userId, authState?.token]);
 
   const loadChats = async () => {
     setLoading(true);
