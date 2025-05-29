@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import io from 'socket.io-client';
 import { useAuth } from '../../context/AuthContext';
+import { useIsFocused } from '@react-navigation/native';
 
 // Define navigation params same as in HomeScreen
 type RootStackParamList = {
@@ -170,6 +171,8 @@ export default function ChatListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation<NavigationProp>();
   const { authState } = useAuth();
+  const isFocused = useIsFocused();
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   useEffect(() => {
     loadChats();
@@ -192,6 +195,15 @@ export default function ChatListScreen() {
       socket.disconnect();
     };
   }, [authState?.userId, authState?.token]);
+
+  useEffect(() => {
+    if (isFocused && activeChatId) {
+      setChats(prevChats => prevChats.map(chat =>
+        chat.id === activeChatId ? { ...chat, hasUnread: false } : chat
+      ));
+      setActiveChatId(null);
+    }
+  }, [isFocused]);
 
   const loadChats = async () => {
     setLoading(true);
@@ -226,6 +238,7 @@ export default function ChatListScreen() {
   };
 
   const handleChatPress = (chatId: string, chatName?: string) => {
+    setActiveChatId(chatId);
     setChats(prevChats => prevChats.map(chat =>
       chat.id === chatId ? { ...chat, hasUnread: false } : chat
     ));
