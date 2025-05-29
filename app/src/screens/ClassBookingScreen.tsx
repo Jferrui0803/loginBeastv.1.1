@@ -8,6 +8,7 @@ import { jwtDecode } from 'jwt-decode';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import ClassCard from "../components/ClassCard"
 
 interface Clase {
   id: string;
@@ -33,6 +34,17 @@ export default function ClassBookingScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reserving, setReserving] = useState<string | null>(null);
+
+  const formatearFecha = (isoDate: string) => {
+    const fecha = new Date(isoDate);
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getFullYear();
+    const horas = fecha.getHours().toString().padStart(2, '0');
+    const minutos = fecha.getMinutes().toString().padStart(2, '0');
+
+    return `${dia}/${mes}/${año} ${horas}:${minutos}`;
+  };
 
   const fetchClases = async () => {
     try {
@@ -89,8 +101,8 @@ export default function ClassBookingScreen() {
     return (
       <View style={styles.loader}>
         <Text style={styles.errorText}>{error}</Text>
-        <Button 
-          mode="contained" 
+        <Button
+          mode="contained"
           onPress={fetchClases}
           style={styles.retryButton}
           textColor="#ffffff"
@@ -103,62 +115,27 @@ export default function ClassBookingScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollContainer} 
+      <ScrollView
+        style={styles.scrollContainer}
         contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}
       >
         <Text style={styles.headerTitle}>RESERVA TU CLASE</Text>
-        
-        {clases.map((clase) => {
-          const hora = new Date(clase.startTime).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          });
-          return (
-            <View key={clase.id} style={styles.classCardContainer}>
-              <View style={styles.classCard}>
-                <View style={styles.cardHeader}>
-                  <Avatar.Icon
-                    size={56}
-                    icon="dumbbell"
-                    style={styles.avatar}
-                    color="#ffffff"
-                  />
-                  <View style={styles.titleContainer}>
-                    <Text style={styles.className}>{clase.name.toUpperCase()}</Text>
-                    <Text style={styles.instructor}>Instructor: {clase.instructor}</Text>
-                  </View>
-                </View>
-                
-                <View style={styles.cardContent}>
-                  <View style={styles.infoRow}>
-                    <Icon name="clock-outline" size={24} color="#ff6b35" />
-                    <Text style={styles.infoText}>Hora: {hora}</Text>
-                  </View>
-                  <View style={styles.infoRow}>
-                    <Icon name="map-marker" size={24} color="#ff6b35" />
-                    <Text style={styles.infoText}>Gimnasio: {clase.gym.name}</Text>
-                  </View>
-                </View>
-                
-                <View style={styles.cardActions}>
-                  <Button
-                    mode="contained"
-                    style={styles.reserveButton}
-                    loading={reserving === clase.id}
-                    disabled={reserving === clase.id}
-                    onPress={() => reservarClase(clase.id)}
-                    textColor="#ffffff"
-                    icon={() => <Icon name="calendar-check" size={20} color="#ffffff" />}
-                  >
-                    {reserving === clase.id ? 'RESERVANDO...' : 'RESERVAR AHORA'}
-                  </Button>
-                </View>
-              </View>
-            </View>
-          );
-        })}
-        
+
+        {clases.map((clase) => (
+          <ClassCard
+            key={clase.id}
+            id={clase.id}
+            name={clase.name}
+            instructor={clase.instructor}
+            gym={clase.gym}
+            startTime={clase.startTime}
+            reserving={reserving === clase.id}
+            onReserve={() => reservarClase(clase.id)}
+            formatearFecha={formatearFecha}
+          />
+        ))}
+
+
         {!clases.length && (
           <View style={styles.emptyContainer}>
             <Icon name="calendar-remove" size={64} color="#cccccc" />
