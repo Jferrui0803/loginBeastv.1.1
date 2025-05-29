@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
 import { View, StyleSheet, ScrollView, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Text, Card, Button, IconButton, Surface, Chip, Portal, Modal, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -13,12 +13,28 @@ type RootStackParamList = {
   ChatList: undefined;
   WorkoutDetail: undefined;
   GymMap: undefined;
+  Profile: undefined;
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function RoutinesScreen() {
   const navigation = useNavigation<NavigationProp>();
+
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="account-circle"
+          size={28}
+          iconColor="#ffa500"
+          onPress={() => navigation.navigate('Profile')}
+          style={styles.headerButton}
+        />
+      ),
+    });
+  }, [navigation]);
   
   // Estados para la calculadora de IMC
   const [showIMCModal, setShowIMCModal] = useState(false);
@@ -29,15 +45,15 @@ export default function RoutinesScreen() {
 
   // Estados para el contador de entrenamiento
   const [showTimer, setShowTimer] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(180); // 3 minutos = 180 segundos
+  const [timeLeft, setTimeLeft] = useState(180);
   const [isActive, setIsActive] = useState(false);
-  const [activeRoutineIndex, setActiveRoutineIndex] = useState<number | null>(null); // Nuevo estado
+  const [activeRoutineIndex, setActiveRoutineIndex] = useState<number | null>(null);
 
   const weeklyStats = [
-    { icon: 'fire', value: '2,450', label: 'Calorías quemadas', color: '#FF4444' },
-    { icon: 'clock-outline', value: '8.5h', label: 'Tiempo total', color: '#4444FF' },
-    { icon: 'dumbbell', value: '12', label: 'Entrenamientos', color: '#44FF44' },
-    { icon: 'trophy', value: '95%', label: 'Objetivos cumplidos', color: '#FFD700' },
+    { icon: 'fire', value: '2,450', label: 'Calorías quemadas', color: '#ffa500' },
+    { icon: 'clock-outline', value: '8.5h', label: 'Tiempo total', color: '#ffa500' },
+    { icon: 'dumbbell', value: '12', label: 'Entrenamientos', color: '#ffa500' },
+    { icon: 'trophy', value: '95%', label: 'Objetivos cumplidos', color: '#ffa500' },
   ];
 
   const workoutPlans = [
@@ -103,16 +119,13 @@ export default function RoutinesScreen() {
   // Funciones para el timer
   const iniciarEntrenamiento = (routineIndex: number) => {
     if (!isActive && timeLeft === 180) {
-      // Si no está activo y está en tiempo inicial, abrir modal
       setActiveRoutineIndex(routineIndex);
       setShowTimer(true);
       setTimeLeft(180);
       setIsActive(true);
     } else if (activeRoutineIndex === routineIndex) {
-      // Si ya está en progreso y es la misma rutina, solo cambiar el estado
       toggleTimer();
     } else {
-      // Si es una rutina diferente, cambiar la rutina activa
       setActiveRoutineIndex(routineIndex);
       setShowTimer(true);
       setTimeLeft(180);
@@ -132,7 +145,6 @@ export default function RoutinesScreen() {
 
   const cerrarTimer = () => {
     setShowTimer(false);
-    // NO resetear el timer ni isActive aquí para mantener el estado
   };
 
   const formatTime = (seconds: number) => {
@@ -142,16 +154,17 @@ export default function RoutinesScreen() {
   };
 
   const getTimerColor = () => {
-    if (timeLeft > 120) return '#4CAF50'; // Verde
-    if (timeLeft > 60) return '#FF9800';  // Naranja
-    return '#F44336'; // Rojo
+    if (timeLeft > 120) return '#4CAF50';
+    if (timeLeft > 60) return '#FF9800';
+    return '#F44336';
   };
+
   // Funciones para IMC
   const calcularIMC = () => {
     Keyboard.dismiss(); 
     
     const pesoNum = parseFloat(peso);
-    const alturaNum = parseFloat(altura) / 100; // convertir cm a metros
+    const alturaNum = parseFloat(altura) / 100;
 
     if (!pesoNum || !alturaNum || pesoNum <= 0 || alturaNum <= 0) {
       Alert.alert('Error', 'Por favor ingresa valores válidos para peso y altura');
@@ -161,7 +174,6 @@ export default function RoutinesScreen() {
     const imcCalculado = pesoNum / (alturaNum * alturaNum);
     setIMC(parseFloat(imcCalculado.toFixed(1)));
 
-    // Determinar categoría
     let categoria = '';
     if (imcCalculado < 18.5) {
       categoria = 'Bajo peso';
@@ -199,163 +211,186 @@ export default function RoutinesScreen() {
     <View style={styles.container}>
       <ScrollView 
         style={styles.scrollView} 
-        contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Estadísticas semanales */}
-        <Surface style={styles.statsContainer} elevation={2}>
-          <Text style={styles.sectionTitle}>Resumen semanal</Text>
-          <View style={styles.statsGrid}>
-            {weeklyStats.map((stat, index) => (
-              <View key={index} style={styles.statItem}>
-                <Icon name={stat.icon} size={28} color={stat.color} />
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </View>
-            ))}
+        {/* Header Section - Estilo Hero Section como otras pantallas */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Rutinas de entrenamiento</Text>
+            <Text style={styles.headerSubtitle}>Encuentra tu rutina perfecta</Text>
           </View>
-        </Surface>
+          <View style={styles.headerIcon}>
+            <Icon name="dumbbell" size={32} color="#ffa500" />
+          </View>
+        </View>
 
-        {/* Rutinas recomendadas */}
+        {/* Estadísticas semanales */}
+        <Card style={styles.statsCard}>
+          <Card.Content style={styles.statsContent}>
+            <View style={styles.statsHeader}>
+              <Text style={styles.statsTitle}>Resumen semanal</Text>
+              <Icon name="chart-box" size={24} color="#ffa500" />
+            </View>
+            <View style={styles.statsGrid}>
+              {weeklyStats.map((stat, index) => (
+                <View key={index} style={styles.statBox}>
+                  <View style={styles.statIconContainer}>
+                    <Icon name={stat.icon} size={20} color="#ffa500" />
+                  </View>
+                  <Text style={styles.statValue}>{stat.value}</Text>
+                  <Text style={styles.statLabel}>{stat.label}</Text>
+                </View>
+              ))}
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Rutinas de entrenamiento */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: 'black' }]}>Rutinas de entrenamiento</Text>
+          <Text style={styles.sectionTitle}>Rutinas disponibles</Text>
           {workoutPlans.map((plan, index) => (
             <Card key={index} style={styles.workoutCard}>
-              <Card.Content>
+              <Card.Content style={styles.workoutCardContent}>
                 <View style={styles.workoutHeader}>
                   <View style={styles.workoutIconContainer}>
-                    <Icon name={plan.icon} size={32} color="white" />
+                    <Icon name={plan.icon} size={24} color="#ffa500" />
                   </View>
                   <View style={styles.workoutInfo}>
                     <Text style={styles.workoutTitle}>{plan.title}</Text>
                     <Text style={styles.workoutSubtitle}>{plan.subtitle}</Text>
                   </View>
-                  <Chip 
-                    style={[styles.difficultyChip, { backgroundColor: getDifficultyColor(plan.difficulty) }]}
-                    textStyle={{ color: 'white', fontWeight: 'bold' }}
-                  >
-                    {plan.difficulty}
-                  </Chip>
+                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(plan.difficulty) }]}>
+                    <Text style={styles.difficultyText}>{plan.difficulty}</Text>
+                  </View>
                 </View>
                 
                 <View style={styles.workoutDetails}>
                   <View style={styles.workoutDetailItem}>
-                    <Icon name="clock-outline" size={20} color="#666" />
+                    <Icon name="clock-outline" size={18} color="#666" />
                     <Text style={styles.workoutDetailText}>{plan.duration}</Text>
                   </View>
                   <View style={styles.workoutDetailItem}>
-                    <Icon name="format-list-numbered" size={20} color="#666" />
+                    <Icon name="format-list-numbered" size={18} color="#666" />
                     <Text style={styles.workoutDetailText}>{plan.exercises}</Text>
                   </View>
                 </View>
+
+                {(isActive || timeLeft < 180) && activeRoutineIndex === index && (
+                  <View style={styles.timerInfo}>
+                    <Icon name="clock-outline" size={18} color="#ffa500" />
+                    <Text style={styles.timerInfoText}>
+                      Tiempo restante: {formatTime(timeLeft)}
+                    </Text>
+                  </View>
+                )}
               </Card.Content>
-              <Card.Actions>
-                <View style={styles.cardActionContainer}>
-                  {(isActive || timeLeft < 180) && activeRoutineIndex === index && (
-                    <View style={styles.timerInfo}>
-                      <Icon name="clock-outline" size={20} color="#333" />
-                      <Text style={styles.timerInfoText}>
-                        {formatTime(timeLeft)}
-                      </Text>
-                    </View>
+
+              <Card.Actions style={styles.workoutCardActions}>
+                <Button
+                  mode="contained"
+                  style={styles.startButton}
+                  labelStyle={styles.startButtonText}
+                  icon={() => (
+                    <Icon 
+                      name={activeRoutineIndex === index && isActive ? "pause" : "play"} 
+                      size={16} 
+                      color="#000000" 
+                    />
                   )}
-                  <Button
-                    mode="contained-tonal"
-                    style={[styles.routineButton, { backgroundColor: '#f5f5dc' }]}
-                    textColor="black"
-                    onPress={() => iniciarEntrenamiento(index)}
-                    icon={() => (
-                      <Icon 
-                        name={activeRoutineIndex === index && isActive ? "pause" : "play"} 
-                        size={20} 
-                        color="black" 
-                      />
-                    )}
-                  >
-                    {activeRoutineIndex === index && isActive ? 'Pausar' : 
-                     activeRoutineIndex === index && timeLeft < 180 ? 'Continuar' : 
-                     'Iniciar rutina'}
-                  </Button>
-                </View>
+                  onPress={() => iniciarEntrenamiento(index)}
+                >
+                  {activeRoutineIndex === index && isActive ? 'PAUSAR' : 
+                   activeRoutineIndex === index && timeLeft < 180 ? 'CONTINUAR' : 
+                   'INICIAR RUTINA'}
+                </Button>
               </Card.Actions>
             </Card>
           ))}
         </View>
 
-        {/* ...existing code... resto del código igual... */}
-        {/* Herramientas adicionales */}
-        <Surface style={styles.toolsContainer} elevation={1}>
-          <Text style={styles.sectionTitle}>Herramientas</Text>
-          <View style={styles.toolsGrid}>
-            <Button
-              mode="contained-tonal"
-              icon={() => <Icon name="calculator" size={24} color="black" />}
-              style={styles.toolButton}
-              textColor="black"
-              onPress={() => setShowIMCModal(true)}
-            >
-              Calculadora IMC
-            </Button>
-          </View>
-        </Surface>
-
-        {/* Sección de nutrición */}
+        {/* Herramientas */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: 'black' }]}>Nutrición personalizada</Text>
-          <Card style={styles.nutritionCard}>
-            <Card.Content>
-              <View style={styles.cardIconHeader}>
-                <Icon name="food-apple" size={32} color="black" />
-                <View style={styles.cardTextContent}>
-                  <Text variant="titleMedium" style={{ color: 'black' }}>
-                    Plan alimenticio personalizado
-                  </Text>
-                  <Text variant="bodySmall" style={{ color: 'black' }}>
-                    Alcanza tus objetivos con una dieta equilibrada
-                  </Text>
+          <Text style={styles.sectionTitle}>Herramientas útiles</Text>
+          <Card style={styles.toolsCard}>
+            <Card.Content style={styles.toolsContent}>
+              <View style={styles.toolHeader}>
+                <View style={styles.toolIconContainer}>
+                  <Icon name="calculator" size={24} color="#ffa500" />
+                </View>
+                <View style={styles.toolInfo}>
+                  <Text style={styles.toolTitle}>Calculadora de IMC</Text>
+                  <Text style={styles.toolSubtitle}>Calcula tu índice de masa corporal</Text>
                 </View>
               </View>
             </Card.Content>
-            <Card.Actions>
+            <Card.Actions style={styles.toolCardActions}>
               <Button
-                mode="contained-tonal"
-                style={{ backgroundColor: '#f5f5dc' }}
-                textColor="black"
-                onPress={() => navigation.navigate('IAChatList', { chatType: 'nutrition' })}
-                icon={() => <Icon name="chat" size={20} color="black" />}
+                mode="contained"
+                style={styles.toolButton}
+                labelStyle={styles.toolButtonText}
+                icon={() => <Icon name="calculator" size={16} color="#000000" />}
+                onPress={() => setShowIMCModal(true)}
               >
-                Consultar nutricionista IA
+                CALCULAR IMC
+              </Button>
+            </Card.Actions>
+          </Card>
+        </View>
+
+        {/* Nutrición personalizada */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nutrición personalizada</Text>
+          <Card style={styles.nutritionCard}>
+            <Card.Content style={styles.nutritionContent}>
+              <View style={styles.nutritionHeader}>
+                <View style={styles.nutritionIconContainer}>
+                  <Icon name="food-apple" size={24} color="#ffa500" />
+                </View>
+                <View style={styles.nutritionInfo}>
+                  <Text style={styles.nutritionTitle}>Plan alimenticio personalizado</Text>
+                  <Text style={styles.nutritionSubtitle}>Alcanza tus objetivos con una dieta equilibrada</Text>
+                </View>
+              </View>
+            </Card.Content>
+            <Card.Actions style={styles.nutritionCardActions}>
+              <Button
+                mode="contained"
+                style={styles.nutritionButton}
+                labelStyle={styles.nutritionButtonText}
+                icon={() => <Icon name="chat" size={16} color="#000000" />}
+                onPress={() => navigation.navigate('IAChatList', { chatType: 'nutrition' })}
+              >
+                CONSULTAR IA
               </Button>
             </Card.Actions>
           </Card>
         </View>
         
-        {/* Sección de entrenamiento personalizado */}
+        {/* Entrenamiento personalizado */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: 'black' }]}>Entrenamiento personalizado</Text>
-          <Card style={styles.nutritionCard}>
-            <Card.Content>
-              <View style={styles.cardIconHeader}>
-                <Icon name="account-supervisor" size={32} color="black" />
-                <View style={styles.cardTextContent}>
-                  <Text variant="titleMedium" style={{ color: 'black' }}>
-                    Plan de entrenamiento personalizado
-                  </Text>
-                  <Text variant="bodySmall" style={{ color: 'black' }}>
-                    Diseña tu entrenamiento basado en tu anatomía
-                  </Text>
+          <Text style={styles.sectionTitle}>Entrenamiento personalizado</Text>
+          <Card style={styles.trainingCard}>
+            <Card.Content style={styles.trainingContent}>
+              <View style={styles.trainingHeader}>
+                <View style={styles.trainingIconContainer}>
+                  <Icon name="account-supervisor" size={24} color="#ffa500" />
+                </View>
+                <View style={styles.trainingInfo}>
+                  <Text style={styles.trainingTitle}>Plan de entrenamiento personalizado</Text>
+                  <Text style={styles.trainingSubtitle}>Diseña tu entrenamiento basado en tu anatomía</Text>
                 </View>
               </View>
             </Card.Content>
-            <Card.Actions>
+            <Card.Actions style={styles.trainingCardActions}>
               <Button
-                mode="contained-tonal"
-                style={{ backgroundColor: '#f5f5dc' }}
-                textColor="black"
+                mode="contained"
+                style={styles.trainingButton}
+                labelStyle={styles.trainingButtonText}
+                icon={() => <Icon name="robot" size={16} color="#000000" />}
                 onPress={() => navigation.navigate('IAChatList', { chatType: 'training' })}
-                icon={() => <Icon name="robot" size={20} color="black" />}
               >
-                Consultar entrenador IA
+                CONSULTAR ENTRENADOR IA
               </Button>
             </Card.Actions>
           </Card>
@@ -373,8 +408,8 @@ export default function RoutinesScreen() {
             <Card.Title
               title="Entrenamiento en Progreso"
               subtitle="Mantén el ritmo y concéntrate"
-              titleStyle={{ color: 'black', fontWeight: 'bold' }}
-              subtitleStyle={{ color: '#666' }}
+              titleStyle={styles.timerModalTitle}
+              subtitleStyle={styles.timerModalSubtitle}
               left={(props) => <Icon {...props} name="dumbbell" size={32} color="#ffa500" />}
               right={(props) => (
                 <IconButton
@@ -414,7 +449,7 @@ export default function RoutinesScreen() {
               </View>
 
               <View style={styles.motivationalContainer}>
-                <Icon name="fire" size={24} color="#FF4444" />
+                <Icon name="fire" size={24} color="#ffa500" />
                 <Text style={styles.motivationalText}>
                   {timeLeft > 120 ? '¡Empezamos fuerte!' : 
                    timeLeft > 60 ? '¡Vas por buen camino!' : 
@@ -428,19 +463,19 @@ export default function RoutinesScreen() {
                 mode="outlined"
                 onPress={resetTimer}
                 style={styles.timerActionButton}
-                textColor="#666"
-                icon={() => <Icon name="restart" size={20} color="#666" />}
+                labelStyle={styles.timerResetButtonText}
+                icon={() => <Icon name="restart" size={16} color="#666" />}
               >
-                Reiniciar
+                REINICIAR
               </Button>
               <Button
                 mode="contained"
                 onPress={toggleTimer}
-                style={[styles.timerActionButton, { backgroundColor: isActive ? '#FF9800' : '#4CAF50' }]}
-                textColor="white"
-                icon={() => <Icon name={isActive ? "pause" : "play"} size={20} color="white" />}
+                style={[styles.timerActionButton, { backgroundColor: '#ffa500' }]}
+                labelStyle={styles.timerToggleButtonText}
+                icon={() => <Icon name={isActive ? "pause" : "play"} size={16} color="#000000" />}
               >
-                {isActive ? 'Pausar' : 'Continuar'}
+                {isActive ? 'PAUSAR' : 'CONTINUAR'}
               </Button>
             </Card.Actions>
           </Card>
@@ -460,8 +495,8 @@ export default function RoutinesScreen() {
                 <Card.Title
                   title="Calculadora de IMC"
                   subtitle="Índice de Masa Corporal"
-                  titleStyle={{ color: 'black', fontWeight: 'bold' }}
-                  subtitleStyle={{ color: '#666' }}
+                  titleStyle={styles.imcModalTitle}
+                  subtitleStyle={styles.imcModalSubtitle}
                   left={(props) => <Icon {...props} name="calculator" size={32} color="#ffa500" />}
                   right={(props) => (
                     <IconButton
@@ -473,7 +508,7 @@ export default function RoutinesScreen() {
                   )}
                 />
                 
-                <Card.Content>
+                <Card.Content style={styles.imcContent}>
                   <TextInput
                     label="Peso (kg)"
                     value={peso}
@@ -482,8 +517,8 @@ export default function RoutinesScreen() {
                     mode="outlined"
                     style={styles.inputField}
                     activeOutlineColor="#ffa500"
-                    textColor="black"
-                    left={<TextInput.Icon icon="weight" iconColor="black" />}
+                    textColor="#1A1A1A"
+                    left={<TextInput.Icon icon="weight" iconColor="#ffa500" />}
                   />
 
                   <TextInput
@@ -494,45 +529,45 @@ export default function RoutinesScreen() {
                     mode="outlined"
                     style={styles.inputField}
                     activeOutlineColor="#ffa500"
-                    textColor="black"
-                    left={<TextInput.Icon icon="human-male-height" iconColor="black" />}
+                    textColor="#1A1A1A"
+                    left={<TextInput.Icon icon="human-male-height" iconColor="#ffa500" />}
                   />
 
                   {imc && (
-                    <Surface style={[styles.resultadoContainer, { borderLeftColor: getIMCColor() }]} elevation={1}>
+                    <View style={[styles.resultadoContainer, { borderLeftColor: getIMCColor() }]}>
                       <View style={styles.resultadoHeader}>
-                        <Icon name="chart-line" size={32} color="black" />
+                        <Icon name="chart-line" size={32} color="#ffa500" />
                         <View style={styles.resultadoTexto}>
-                          <Text style={[styles.imcValor, { color: 'black' }]}>
+                          <Text style={styles.imcValor}>
                             IMC: {imc}
                           </Text>
-                          <Text style={[styles.categoriaTexto, { color: 'black' }]}>
+                          <Text style={styles.categoriaTexto}>
                             {categoriaIMC}
                           </Text>
                         </View>
                       </View>
                         
-                        <View style={styles.referenciasContainer}>
-                          <Text style={styles.referenciasTitle}>Referencias:</Text>
-                          <View style={styles.referenciaItem}>
-                            <View style={[styles.colorIndicator, { backgroundColor: '#2196F3' }]} />
-                            <Text style={styles.referenciaTexto}>Bajo peso: &lt; 18.5</Text>
-                          </View>
-                          <View style={styles.referenciaItem}>
-                            <View style={[styles.colorIndicator, { backgroundColor: '#4CAF50' }]} />
-                            <Text style={styles.referenciaTexto}>Normal: 18.5 - 24.9</Text>
-                          </View>
-                          <View style={styles.referenciaItem}>
-                            <View style={[styles.colorIndicator, { backgroundColor: '#FF9800' }]} />
-                            <Text style={styles.referenciaTexto}>Sobrepeso: 25 - 29.9</Text>
-                          </View>
-                          <View style={styles.referenciaItem}>
-                            <View style={[styles.colorIndicator, { backgroundColor: '#F44336' }]} />
-                            <Text style={styles.referenciaTexto}>Obesidad: ≥ 30</Text>
-                          </View>
+                      <View style={styles.referenciasContainer}>
+                        <Text style={styles.referenciasTitle}>Referencias:</Text>
+                        <View style={styles.referenciaItem}>
+                          <View style={[styles.colorIndicator, { backgroundColor: '#2196F3' }]} />
+                          <Text style={styles.referenciaTexto}>Bajo peso: &lt; 18.5</Text>
                         </View>
-                      </Surface>
-                    )}
+                        <View style={styles.referenciaItem}>
+                          <View style={[styles.colorIndicator, { backgroundColor: '#4CAF50' }]} />
+                          <Text style={styles.referenciaTexto}>Normal: 18.5 - 24.9</Text>
+                        </View>
+                        <View style={styles.referenciaItem}>
+                          <View style={[styles.colorIndicator, { backgroundColor: '#FF9800' }]} />
+                          <Text style={styles.referenciaTexto}>Sobrepeso: 25 - 29.9</Text>
+                        </View>
+                        <View style={styles.referenciaItem}>
+                          <View style={[styles.colorIndicator, { backgroundColor: '#F44336' }]} />
+                          <Text style={styles.referenciaTexto}>Obesidad: ≥ 30</Text>
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </Card.Content>
                 
                 <Card.Actions style={styles.modalActions}>
@@ -540,18 +575,18 @@ export default function RoutinesScreen() {
                     mode="outlined"
                     onPress={resetearCalculadora}
                     style={styles.actionButton}
-                    textColor="#666"
+                    labelStyle={styles.resetButtonText}
                   >
-                    Limpiar
+                    LIMPIAR
                   </Button>
                   <Button
                     mode="contained"
                     onPress={calcularIMC}
                     style={[styles.actionButton, { backgroundColor: '#ffa500' }]}
-                    textColor="white"
-                    icon={() => <Icon name="calculator" size={20} color="white" />}
+                    labelStyle={styles.calculateButtonText}
+                    icon={() => <Icon name="calculator" size={16} color="#000000" />}
                   >
-                    Calcular
+                    CALCULAR
                   </Button>
                 </Card.Actions>
               </Card>
@@ -560,30 +595,34 @@ export default function RoutinesScreen() {
         </Modal>
       </Portal>
 
-      {/* Barra de navegación inferior fija */}
+      {/* Bottom Navigation - Sin el ícono de perfil aquí */}
       <View style={styles.bottomBar}>
         <IconButton
           icon="home"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('HomeScreen')}
         />
         <IconButton
           icon="calendar"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('ClassBooking')}
         />
         <IconButton
           icon="chart-line"
-          size={32}
-          iconColor="white"
-          onPress={() => alert('Que no está implementado todavía, ansias')}
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
+          onPress={() => navigation.navigate('ProgressScreen')}
         />
         <IconButton
           icon="dumbbell"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="#FFFFFF" // Activo porque estamos en RoutinesScreen
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('Routines')}
         />
       </View>
@@ -591,254 +630,425 @@ export default function RoutinesScreen() {
   );
 }
 
-// ...existing code... estilos igual...
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5dc',
+    backgroundColor: '#f5f5dc', 
   },
   scrollView: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  // Header Section - Estilo Hero Section como HomeScreen
+  headerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+    borderRadius: 0,
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '400',
+  },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Header Button - Para el ícono de perfil
+  headerButton: {
+    marginRight: 8,
+  },
+
+  // Sections
   section: {
-    padding: 16,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
     marginBottom: 16,
-    color: '#333',
+    marginHorizontal: 20,
   },
-  nutritionCard: {
-    marginTop: 8,
-    backgroundColor: '#ffa500'
+
+  // Stats Card - Estilo como HomeScreen
+  statsCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  statsContainer: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#ffa500'
+  statsContent: {
+    padding: 20,
+  },
+  statsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
   },
   statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     flexWrap: 'wrap',
-    marginTop: 8,
   },
-  statItem: {
+  statBox: {
     alignItems: 'center',
+    flex: 1,
     minWidth: '45%',
-    marginBottom: 16,
+    marginBottom: 8,
+  },
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 8,
-    color: 'black',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
   },
   statLabel: {
-    color: '#333',
-    marginTop: 4,
-    textAlign: 'center',
     fontSize: 12,
+    color: '#666666',
+    fontWeight: '500',
+    textAlign: 'center',
   },
+
+  // Workout Cards
   workoutCard: {
-    marginVertical: 8,
-    backgroundColor: '#ffa500'
+    marginHorizontal: 20,
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  workoutCardContent: {
+    padding: 20,
   },
   workoutHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   workoutIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#b8860b',
-    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
   workoutInfo: {
     flex: 1,
   },
   workoutTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
   },
   workoutSubtitle: {
     fontSize: 14,
-    color: '#333',
-    marginTop: 2,
+    color: '#666666',
   },
-  difficultyChip: {
-    marginLeft: 8,
+  difficultyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 0, 
+  },
+  difficultyText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   workoutDetails: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 8,
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   workoutDetailItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   workoutDetailText: {
     marginLeft: 6,
-    color: '#333',
+    fontSize: 14,
     fontWeight: '500',
-  },
-  toolsContainer: {
-    margin: 16,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#ffa500'
-  },
-  toolsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start', 
-    flexWrap: 'wrap',
-  },
-  toolButton: {
-    backgroundColor: '#f5f5dc',
-    marginHorizontal: 4,
-    marginVertical: 4,
-    minWidth: '45%',
-  },
-  cardIconHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardTextContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  // Nuevos estilos para el timer en las cards
-  cardActionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 8,
+    color: '#1A1A1A',
   },
   timerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 12,
+    paddingVertical: 8,
+    marginTop: 8,
   },
   timerInfoText: {
-    marginLeft: 6,
-    fontWeight: 'bold',
-    color: '#333',
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A1A1A',
     fontFamily: 'monospace',
   },
-  routineButton: {
-    flex: 1,
-    maxWidth: 150,
+  workoutCardActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    justifyContent: 'flex-start',
   },
-  bottomBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 64,
-    backgroundColor: '#b8860b',
+  startButton: {
+    backgroundColor: '#ffa500',
+    paddingVertical: 2, 
+    paddingHorizontal: 12, 
+    elevation: 0,
+    minWidth: 120,
+    alignSelf: 'flex-start',
+  },
+  startButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+
+  // Tools Card
+  toolsCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  toolsContent: {
+    padding: 20,
+  },
+  toolHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-    zIndex: 100,
-    elevation: 10,
   },
-  // Estilos para el modal de IMC
-  modalContainer: {
-    margin: 20,
-    backgroundColor: 'transparent',
+  toolIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
-  imcCard: {
-    backgroundColor: '#f5f5dc',
-    borderRadius: 12,
+  toolInfo: {
+    flex: 1,
   },
-  inputField: {
-    marginVertical: 8,
-    backgroundColor: 'white',
-  },
-  imcValor: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black', 
-  },
-  categoriaTexto: {
+  toolTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    marginTop: 4,
-    color: 'black', 
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
   },
-  resultadoContainer: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-  },
-  resultadoHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  resultadoTexto: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  referenciasContainer: {
-    marginTop: 12,
-  },
-  referenciasTitle: {
+  toolSubtitle: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    color: '#666666',
   },
-  referenciaItem: {
+  toolCardActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    justifyContent: 'flex-start',
+  },
+  toolButton: {
+    backgroundColor: '#ffa500',
+    paddingVertical: 2, 
+    paddingHorizontal: 12,
+    elevation: 0,
+    alignSelf: 'flex-start',
+  },
+  toolButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+
+  // Nutrition Card
+  nutritionCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  nutritionContent: {
+    padding: 20,
+  },
+  nutritionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
   },
-  colorIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
+  nutritionIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
-  referenciaTexto: {
-    fontSize: 12,
-    color: '#666',
-  },
-  modalActions: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  actionButton: {
+  nutritionInfo: {
     flex: 1,
-    marginHorizontal: 4,
   },
-  // Estilos para el timer
+  nutritionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
+  },
+  nutritionSubtitle: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  nutritionCardActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    justifyContent: 'flex-start',
+  },
+  nutritionButton: {
+    backgroundColor: '#ffa500',
+    paddingVertical: 2, 
+    paddingHorizontal: 12,
+    elevation: 0,
+    alignSelf: 'flex-start',
+  },
+  nutritionButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+
+  // Training Card
+  trainingCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  trainingContent: {
+    padding: 20,
+  },
+  trainingHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  trainingIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  trainingInfo: {
+    flex: 1,
+  },
+  trainingTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
+  },
+  trainingSubtitle: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  trainingCardActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    justifyContent: 'flex-start',
+  },
+  trainingButton: {
+    backgroundColor: '#ffa500',
+    paddingVertical: 2, 
+    paddingHorizontal: 12, 
+    elevation: 0,
+    alignSelf: 'flex-start',
+  },
+  trainingButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+
+  // Timer Modal
   timerModalContainer: {
     margin: 20,
     backgroundColor: 'transparent',
   },
   timerCard: {
-    backgroundColor: '#f5f5dc',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+  },
+  timerModalTitle: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+  },
+  timerModalSubtitle: {
+    color: '#666666',
   },
   timerContent: {
     alignItems: 'center',
@@ -849,13 +1059,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   timerText: {
-    fontSize: 64,
-    fontWeight: 'bold',
+    fontSize: 48,
+    fontWeight: '700',
     fontFamily: 'monospace',
   },
   timerLabel: {
     fontSize: 16,
-    color: '#666',
+    color: '#666666',
     marginTop: 8,
     fontWeight: '600',
   },
@@ -868,41 +1078,167 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 8,
     backgroundColor: '#E0E0E0',
-    borderRadius: 4,
+    borderRadius: 0, 
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 0, 
   },
   progressText: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
     marginTop: 8,
     fontWeight: '600',
   },
   motivationalContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderRadius: 8,
     marginTop: 10,
   },
   motivationalText: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: '700',
+    color: '#1A1A1A',
     marginLeft: 8,
   },
   timerActions: {
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   timerActionButton: {
     flex: 1,
     marginHorizontal: 4,
+    paddingVertical: 2, 
+  },
+  timerResetButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    color: '#666666',
+  },
+  timerToggleButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    color: '#000000',
+  },
+
+  // IMC Modal
+  modalContainer: {
+    margin: 20,
+    backgroundColor: 'transparent',
+  },
+  imcCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+  },
+  imcModalTitle: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+  },
+  imcModalSubtitle: {
+    color: '#666666',
+  },
+  imcContent: {
+    padding: 20,
+  },
+  inputField: {
+    marginVertical: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+  },
+  resultadoContainer: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    borderLeftWidth: 4,
+  },
+  resultadoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  resultadoTexto: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  imcValor: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  categoriaTexto: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 4,
+    color: '#1A1A1A',
+  },
+  referenciasContainer: {
+    marginTop: 12,
+  },
+  referenciasTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 8,
+  },
+  referenciaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  colorIndicator: {
+    width: 12,
+    height: 12,
+    marginRight: 8,
+  },
+  referenciaTexto: {
+    fontSize: 12,
+    color: '#666666',
+  },
+  modalActions: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 4,
+    paddingVertical: 2,
+  },
+  resetButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#666666',
+  },
+  calculateButtonText: {
+    fontSize: 12, 
+    fontWeight: '700',
+    color: '#000000',
+  },
+
+  // Bottom Bar - Estilo idéntico a otras pantallas (sin perfil)
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 70,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  bottomBarButton: {
+    margin: 0,
   },
 });

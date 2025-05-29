@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
 import { View, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Card, Text, Button, Surface, Avatar, IconButton } from 'react-native-paper';
 import axios from 'axios';
@@ -22,6 +22,8 @@ type RootStackParamList = {
   HomeScreen: undefined;
   ClassBooking: undefined;
   Routines: undefined;
+  ProgressScreen: undefined;
+  Profile: undefined; 
 };
 
 interface JwtPayload {
@@ -34,6 +36,21 @@ export default function ClassBookingScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reserving, setReserving] = useState<string | null>(null);
+
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="account-circle"
+          size={28}
+          iconColor="#ffa500"
+          onPress={() => navigation.navigate('Profile')}
+          style={styles.headerButton}
+        />
+      ),
+    });
+  }, [navigation]);
 
   const formatearFecha = (isoDate: string) => {
     const fecha = new Date(isoDate);
@@ -91,7 +108,7 @@ export default function ClassBookingScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#ff6b35" />
+        <ActivityIndicator size="large" color="#ffa500" />
         <Text style={styles.loadingText}>Cargando clases...</Text>
       </View>
     );
@@ -105,7 +122,7 @@ export default function ClassBookingScreen() {
           mode="contained"
           onPress={fetchClases}
           style={styles.retryButton}
-          textColor="#ffffff"
+          labelStyle={styles.retryButtonText}
         >
           Reintentar
         </Button>
@@ -117,58 +134,107 @@ export default function ClassBookingScreen() {
     <View style={styles.container}>
       <ScrollView
         style={styles.scrollContainer}
-        contentContainerStyle={{ paddingVertical: 24, paddingBottom: 90 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headerTitle}>RESERVA TU CLASE</Text>
-
-        {clases.map((clase) => (
-          <ClassCard
-            key={clase.id}
-            id={clase.id}
-            name={clase.name}
-            instructor={clase.instructor}
-            gym={clase.gym}
-            startTime={clase.startTime}
-            reserving={reserving === clase.id}
-            onReserve={() => reservarClase(clase.id)}
-            formatearFecha={formatearFecha}
-          />
-        ))}
-
-
-        {!clases.length && (
-          <View style={styles.emptyContainer}>
-            <Icon name="calendar-remove" size={64} color="#cccccc" />
-            <Text style={styles.emptyText}>NO HAY CLASES DISPONIBLES</Text>
-            <Text style={styles.emptySubtext}>Consulta más tarde o contacta con el gimnasio</Text>
+        {/* Header Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Reserva tu clase</Text>
+            <Text style={styles.headerSubtitle}>Encuentra la clase perfecta para ti</Text>
           </View>
-        )}
+          <View style={styles.headerIcon}>
+            <Icon name="calendar" size={32} color="#ffa500" />
+          </View>
+        </View>
+
+        {/* Classes List */}
+        <View style={styles.classesSection}>
+          <Text style={styles.sectionTitle}>Clases disponibles</Text>
+          
+          {clases.map((clase) => (
+            <Card key={clase.id} style={styles.classCard}>
+              <Card.Content style={styles.classCardContent}>
+                <View style={styles.classHeader}>
+                  <View style={styles.classIconContainer}>
+                    <Icon name="account-group" size={24} color="#ffa500" />
+                  </View>
+                  <View style={styles.classInfo}>
+                    <Text style={styles.className}>{clase.name}</Text>
+                    <Text style={styles.classInstructor}>Instructor: {clase.instructor}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.classDetails}>
+                  <View style={styles.classDetailItem}>
+                    <Icon name="clock-outline" size={18} color="#666" />
+                    <Text style={styles.classDetailText}>{formatearFecha(clase.startTime)}</Text>
+                  </View>
+                  <View style={styles.classDetailItem}>
+                    <Icon name="map-marker" size={18} color="#666" />
+                    <Text style={styles.classDetailText}>{clase.gym.name}</Text>
+                  </View>
+                </View>
+              </Card.Content>
+
+              <Card.Actions style={styles.classCardActions}>
+                <Button
+                  mode="contained"
+                  style={styles.reserveButton}
+                  labelStyle={styles.reserveButtonText}
+                  icon={() => <Icon name="calendar-check" size={16} color="#000000" />}
+                  loading={reserving === clase.id}
+                  disabled={reserving === clase.id}
+                  onPress={() => reservarClase(clase.id)}
+                >
+                  {reserving === clase.id ? 'RESERVANDO...' : 'RESERVAR'}
+                </Button>
+              </Card.Actions>
+            </Card>
+          ))}
+
+          {!clases.length && (
+            <Card style={styles.emptyCard}>
+              <Card.Content style={styles.emptyContent}>
+                <View style={styles.emptyIconContainer}>
+                  <Icon name="calendar-remove" size={48} color="#666666" />
+                </View>
+                <Text style={styles.emptyTitle}>No hay clases disponibles</Text>
+                <Text style={styles.emptySubtitle}>Consulta más tarde o contacta con el gimnasio</Text>
+              </Card.Content>
+            </Card>
+          )}
+        </View>
       </ScrollView>
 
-      {/* Barra de navegación inferior fija */}
+      {/* Bottom Navigation - SIN el ícono de perfil aquí */}
       <View style={styles.bottomBar}>
         <IconButton
           icon="home"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('HomeScreen')}
         />
         <IconButton
           icon="calendar"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="#FFFFFF"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('ClassBooking')}
         />
         <IconButton
           icon="chart-line"
-          size={32}
-          iconColor="white"
-          onPress={() => alert('Que no está implementado todavía, ansias')}
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
+          onPress={() => navigation.navigate('ProgressScreen')}
         />
         <IconButton
           icon="dumbbell"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('Routines')}
         />
       </View>
@@ -179,17 +245,182 @@ export default function ClassBookingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // Fondo claro profesional
+    backgroundColor: '#f5f5dc', 
   },
   scrollContainer: {
     flex: 1,
-    paddingHorizontal: 16,
   },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  // Header Button - Para el ícono de perfil
+  headerButton: {
+    marginRight: 8,
+  },
+
+  // Header Section - Estilo como Hero Section de HomeScreen
+  headerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+    borderRadius: 0, 
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '400',
+  },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Classes Section
+  classesSection: {
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 16,
+  },
+
+  // Class Cards - Estilo consistente con WorkoutDetailScreen
+  classCard: {
+    marginBottom: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  classCardContent: {
+    padding: 20,
+  },
+  classHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  classIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  classInfo: {
+    flex: 1,
+  },
+  className: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
+  },
+  classInstructor: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  classDetails: {
+    gap: 8,
+  },
+  classDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  classDetailText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1A1A1A',
+  },
+  classCardActions: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    justifyContent: 'flex-start',
+  },
+  reserveButton: {
+    backgroundColor: '#ffa500',
+    borderRadius: 0, 
+    paddingVertical: 4,
+    elevation: 0,
+    minWidth: 120,
+    alignSelf: 'flex-start',
+  },
+  reserveButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+
+  // Empty State
+  emptyCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  emptyContent: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
+  // Loading and Error States
   loader: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f5f5dc',
     paddingHorizontal: 32,
   },
   loadingText: {
@@ -199,121 +430,41 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   errorText: {
-    color: '#dc3545',
+    color: '#FF4444',
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 24,
     fontWeight: '600',
   },
   retryButton: {
-    backgroundColor: '#ff6b35',
-    paddingHorizontal: 24,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#2c3e50',
-    marginBottom: 32,
-    textAlign: 'center',
-    letterSpacing: 2,
-  },
-  classCardContainer: {
-    marginBottom: 20,
-    backgroundColor: '#ffffff',
-    borderRadius: 0,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    borderLeftWidth: 4,
-    borderLeftColor: '#ff6b35',
-  },
-  classCard: {
-    padding: 20,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatar: {
-    backgroundColor: '#ff6b35',
-    marginRight: 16,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  className: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#2c3e50',
-    letterSpacing: 1,
-    marginBottom: 4,
-  },
-  instructor: {
-    color: '#666666',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  cardContent: {
-    marginBottom: 20,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
+    backgroundColor: '#ffa500',
+    borderRadius: 0, 
     paddingVertical: 4,
+    elevation: 0,
   },
-  infoText: {
-    color: '#2c3e50',
+  retryButtonText: {
     fontSize: 16,
-    marginLeft: 12,
-    fontWeight: '500',
-  },
-  cardActions: {
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
-    paddingTop: 16,
-  },
-  reserveButton: {
-    backgroundColor: '#ff6b35',
-    paddingVertical: 8,
-    borderRadius: 0,
-    elevation: 2,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    marginTop: 64,
-    paddingHorizontal: 32,
-  },
-  emptyText: {
-    fontSize: 18,
     fontWeight: '700',
-    color: '#666666',
-    marginTop: 16,
-    textAlign: 'center',
-    letterSpacing: 1,
+    color: '#000000',
   },
-  emptySubtext: {
-    fontSize: 14,
-    color: '#999999',
-    marginTop: 8,
-    textAlign: 'center',
-    lineHeight: 20,
-  },
+
+  // Bottom Bar 
   bottomBar: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
     height: 70,
-    backgroundColor: '#b8860b',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 0,
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
-    borderTopWidth: 3,
-    borderColor: '#ff6b35',
-    elevation: 10,
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  bottomBarButton: {
+    margin: 0,
   },
 });

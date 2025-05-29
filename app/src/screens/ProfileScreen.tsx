@@ -81,7 +81,7 @@ export default function ProfileScreen() {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#ffa500" />
       </View>
     );
   }
@@ -89,198 +89,590 @@ export default function ProfileScreen() {
   if (error) {
     return (
       <View style={styles.loader}>
-        <Text style={{ color: 'red' }}>{error}</Text>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 40 }}>
-      <View style={styles.header}>
-        <Avatar.Icon size={120} icon="account" style={styles.avatar} />
-        <TouchableOpacity style={styles.changePhotoBtn}>
-          <Icon name="camera" size={20} color="#ffa500" />
-          <Text style={styles.changePhotoText}>Cambiar foto</Text>
-        </TouchableOpacity>
-        <Text style={styles.userName}>{user?.name}</Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section - Estilo Hero Section como otras pantallas */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Mi perfil</Text>
+            <Text style={styles.headerSubtitle}>Información personal y estadísticas</Text>
+          </View>
+          <View style={styles.headerIcon}>
+            <Icon name="account-circle" size={32} color="#ffa500" />
+          </View>
+        </View>
 
-      <Card style={styles.card}>
-        <Card.Title title="Información Personal" titleStyle={styles.cardTitle} />
-        <Card.Content>
-          <View style={styles.infoRow}>
-            <Icon name="phone" size={20} color="#ffa500" />
-            <Text style={styles.infoText}>Telefono: {user?.phone}</Text>
-          </View>
-          <Divider style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Icon name="calendar" size={20} color="#ffa500" />
-            <Text style={styles.infoText}>
-              Fecha de nacimiento: {user?.birthday ? new Date(user.birthday).toLocaleDateString('es-ES') : ''}
-            </Text>
-          </View>
-          <Divider style={styles.divider} />
-          <View style={styles.infoRow}>
-            <Icon name="map-marker" size={20} color="#ffa500" />
-            <Text style={styles.infoText}>Ciudad, País</Text>
-          </View>
-        </Card.Content>
-      </Card>
+        {/* Profile Card */}
+        <Card style={styles.profileCard}>
+          <Card.Content style={styles.profileContent}>
+            <View style={styles.avatarContainer}>
+              <Avatar.Icon 
+                size={100} 
+                icon="account" 
+                style={styles.avatar}
+                color="#000000"
+              />
+              <TouchableOpacity style={styles.changePhotoButton}>
+                <Icon name="camera" size={16} color="#ffa500" />
+                <Text style={styles.changePhotoText}>Cambiar foto</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{user?.name}</Text>
+              <Text style={styles.userEmail}>{user?.email}</Text>
+              <View style={styles.userRole}>
+                <Icon name="shield-account" size={16} color="#ffa500" />
+                <Text style={styles.roleText}>
+                  {user?.role === 'admin' ? 'Administrador' : 'Usuario'}
+                </Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
 
-      <Card style={styles.card}>
-        <Card.Title title="Estadísticas" titleStyle={styles.cardTitle} />
-        <Card.Content style={styles.statsContainer}>
-          <View style={styles.statBox}>
-            <Icon name="dumbbell" size={28} color="#ffa500" />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Entrenamientos</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Icon name="fire" size={28} color="#ffa500" />
-            <Text style={styles.statNumber}>0</Text>
-            <Text style={styles.statLabel}>Calorías</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Icon name="clock-outline" size={28} color="#ffa500" />
-            <Text style={styles.statNumber}>0h</Text>
-            <Text style={styles.statLabel}>Tiempo total</Text>
-          </View>
-        </Card.Content>
-      </Card>
+        {/* Personal Information Card */}
+        <Card style={styles.infoCard}>
+          <Card.Content style={styles.infoContent}>
+            <View style={styles.infoHeader}>
+              <Text style={styles.infoTitle}>Información personal</Text>
+              <Icon name="account-details" size={24} color="#ffa500" />
+            </View>
 
-      <Card style={styles.card}>
-        <Card.Content style={styles.actionsContainer}>
-          <Button
-            mode="contained-tonal"
-            icon="account-edit"
-            onPress={() => {
-              if (user) {
-                navigation.navigate('EditProfile', { user });
-              }
-            }}
-            buttonColor="#ffa500"
-            textColor="black"
-            style={styles.actionButton}
-          >
-            Editar Perfil
-          </Button>
-          <Button
-            mode="contained-tonal"
-            icon="lock-reset"
-            onPress={() => console.log('Cambiar contraseña')}
-            buttonColor="#ffa500"
-            textColor="black"
-            style={styles.actionButton}
-          >
-            Cambiar Contraseña
-          </Button>
-          <Button
-            mode="contained-tonal"
-            icon="logout"
-            onPress={onLogout}
-            buttonColor="#ffa500"
-            textColor="black"
-            style={styles.actionButton}
-          >
-            Cerrar Sesión
-          </Button>
-        </Card.Content>
-      </Card>
-    </ScrollView>
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Icon name="phone" size={20} color="#ffa500" />
+              </View>
+              <View style={styles.infoTextContainer}>
+                <Text style={styles.infoLabel}>Teléfono</Text>
+                <Text style={styles.infoValue}>{user?.phone || 'No especificado'}</Text>
+              </View>
+            </View>
+
+            <Divider style={styles.divider} />
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Icon name="calendar" size={20} color="#ffa500" />
+              </View>
+              <View style={styles.infoTextContainer}>
+                <Text style={styles.infoLabel}>Fecha de nacimiento</Text>
+                <Text style={styles.infoValue}>
+                  {user?.birthday 
+                    ? new Date(user.birthday).toLocaleDateString('es-ES') 
+                    : 'No especificada'
+                  }
+                </Text>
+              </View>
+            </View>
+
+            <Divider style={styles.divider} />
+
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconContainer}>
+                <Icon name="calendar-plus" size={20} color="#ffa500" />
+              </View>
+              <View style={styles.infoTextContainer}>
+                <Text style={styles.infoLabel}>Miembro desde</Text>
+                <Text style={styles.infoValue}>
+                  {user?.createdAt 
+                    ? new Date(user.createdAt).toLocaleDateString('es-ES')
+                    : 'No disponible'
+                  }
+                </Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Statistics Card */}
+        <Card style={styles.statsCard}>
+          <Card.Content style={styles.statsContent}>
+            <View style={styles.statsHeader}>
+              <Text style={styles.statsTitle}>Estadísticas</Text>
+              <Icon name="chart-box" size={24} color="#ffa500" />
+            </View>
+            
+            <View style={styles.statsGrid}>
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="dumbbell" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>156</Text>
+                <Text style={styles.statLabel}>Entrenamientos</Text>
+              </View>
+              
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="fire" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>78,450</Text>
+                <Text style={styles.statLabel}>Calorías</Text>
+              </View>
+              
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="clock-outline" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>124h</Text>
+                <Text style={styles.statLabel}>Tiempo total</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Achievements Card */}
+        <Card style={styles.achievementsCard}>
+          <Card.Content style={styles.achievementsContent}>
+            <View style={styles.achievementsHeader}>
+              <Text style={styles.achievementsTitle}>Logros recientes</Text>
+              <Icon name="trophy" size={24} color="#ffa500" />
+            </View>
+            
+            <View style={styles.achievementItem}>
+              <View style={styles.achievementIconContainer}>
+                <Icon name="fire" size={24} color="#ffa500" />
+              </View>
+              <View style={styles.achievementInfo}>
+                <Text style={styles.achievementName}>Racha de 7 días</Text>
+                <Text style={styles.achievementDescription}>Has entrenado 7 días seguidos</Text>
+              </View>
+            </View>
+
+            <Divider style={styles.divider} />
+
+            <View style={styles.achievementItem}>
+              <View style={styles.achievementIconContainer}>
+                <Icon name="medal" size={24} color="#ffa500" />
+              </View>
+              <View style={styles.achievementInfo}>
+                <Text style={styles.achievementName}>Atleta del mes</Text>
+                <Text style={styles.achievementDescription}>Has completado todos tus objetivos</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Actions Card */}
+        <Card style={styles.actionsCard}>
+          <Card.Content style={styles.actionsContent}>
+            <View style={styles.actionsHeader}>
+              <Text style={styles.actionsTitle}>Configuración</Text>
+              <Icon name="cog" size={24} color="#ffa500" />
+            </View>
+            
+            <View style={styles.actionsGrid}>
+              <Button
+                mode="contained"
+                style={styles.actionButton}
+                labelStyle={styles.actionButtonText}
+                icon={() => <Icon name="account-edit" size={16} color="#000000" />}
+                onPress={() => {
+                  if (user) {
+                    navigation.navigate('EditProfile', { user });
+                  }
+                }}
+              >
+                EDITAR PERFIL
+              </Button>
+
+              <Button
+                mode="outlined"
+                style={styles.secondaryButton}
+                labelStyle={styles.secondaryButtonText}
+                icon={() => <Icon name="lock-reset" size={16} color="#666666" />}
+                onPress={() => console.log('Cambiar contraseña')}
+              >
+                CAMBIAR CONTRASEÑA
+              </Button>
+
+              <Button
+                mode="outlined"
+                style={styles.logoutButton}
+                labelStyle={styles.logoutButtonText}
+                icon={() => <Icon name="logout" size={16} color="#F44336" />}
+                onPress={onLogout}
+              >
+                CERRAR SESIÓN
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5dc',
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    backgroundColor: '#f5f5dc', 
   },
-  header: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
+
+  // Header Section - Estilo Hero Section como HomeScreen
+  headerSection: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+    borderRadius: 0, 
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '400',
+  },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Profile Card
+  profileCard: {
+    marginHorizontal: 20,
     marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  profileContent: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
   },
   avatar: {
     backgroundColor: '#ffa500',
+    marginBottom: 12,
   },
-  changePhotoBtn: {
+  changePhotoButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
   },
   changePhotoText: {
     marginLeft: 6,
+    fontSize: 14,
     color: '#ffa500',
     fontWeight: '600',
   },
+  userInfo: {
+    alignItems: 'center',
+  },
   userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 12,
-    color: 'black',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
   },
   userEmail: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 4,
+    fontSize: 16,
+    color: '#666666',
+    marginBottom: 8,
   },
-  card: {
-    marginBottom: 20,
-    borderRadius: 8,
-    backgroundColor: '#ffa500',
-    elevation: 3,
-  },
-  cardTitle: {
-    color: 'black',
-    fontWeight: 'bold',
-  },
-  infoRow: {
+  userRole: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 10,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 0, 
   },
-  infoText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: 'black',
+  roleText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1A1A1A',
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#f5f5dc',
+
+  // Info Card
+  infoCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  statsContainer: {
+  infoContent: {
+    padding: 20,
+  },
+  infoHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  infoIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  infoTextContainer: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666666',
+    fontWeight: '500',
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: '#1A1A1A',
+    fontWeight: '600',
+  },
+
+  // Stats Card - Estilo como HomeScreen
+  statsCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  statsContent: {
+    padding: 20,
+  },
+  statsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   statBox: {
     alignItems: 'center',
     flex: 1,
   },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-    marginTop: 8,
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: 'black',
-    marginTop: 4,
+    fontSize: 12,
+    color: '#666666',
+    fontWeight: '500',
     textAlign: 'center',
   },
-  actionsContainer: {
+
+  // Achievements Card
+  achievementsCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  achievementsContent: {
+    padding: 20,
+  },
+  achievementsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  achievementsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  achievementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  achievementIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  achievementInfo: {
+    flex: 1,
+  },
+  achievementName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
+  },
+  achievementDescription: {
+    fontSize: 14,
+    color: '#666666',
+  },
+
+  // Actions Card
+  actionsCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  actionsContent: {
+    padding: 20,
+  },
+  actionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  actionsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  actionsGrid: {
     gap: 12,
   },
   actionButton: {
-    marginVertical: 6,
-    borderRadius: 8,
+    backgroundColor: '#ffa500',
+    borderRadius: 0, 
+    paddingVertical: 4,
+    elevation: 0,
   },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#000000',
+  },
+  secondaryButton: {
+    borderColor: '#666666',
+    borderRadius: 0, 
+    paddingVertical: 4,
+  },
+  secondaryButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#666666',
+  },
+  logoutButton: {
+    borderColor: '#F44336',
+    borderRadius: 0, 
+    paddingVertical: 4,
+  },
+  logoutButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#F44336',
+  },
+
+  // Divider
+  divider: {
+    backgroundColor: '#E0E0E0',
+    marginVertical: 8,
+  },
+
+  // Loading and Error States
   loader: {
     flex: 1,
-    paddingVertical: 24,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5dc',
+  },
+  errorText: {
+    color: '#F44336',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });

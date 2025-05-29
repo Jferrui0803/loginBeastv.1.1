@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
 import { Surface, SegmentedButtons, Card, DataTable, Button, List, Divider, ProgressBar, Portal, Modal, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,32 +8,141 @@ export default function ProgressScreen() {
   const navigation = useNavigation();
   const [timeRange, setTimeRange] = useState('week');
 
-  const userStats = {
-    totalWorkouts: 25,
-    totalCalories: 3200,
-    totalHours: 6.5,
-    streak: 7,
-    progressPercent: 0.75,
-    nextGoal: 'Completar 30 entrenamientos',
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="account-circle"
+          size={28}
+          iconColor="#ffa500"
+          onPress={() => navigation.navigate('Profile')}
+          style={styles.headerButton}
+        />
+      ),
+    });
+  }, [navigation]);
+
+  // Función para obtener datos dinámicos según el período
+  const getStatsForPeriod = (period: string) => {
+    switch (period) {
+      case 'week':
+        return {
+          totalWorkouts: 4,
+          totalCalories: 1800,
+          totalHours: 3.2,
+          streak: 7,
+          progressPercent: 0.75,
+          nextGoal: 'Completar 5 entrenamientos esta semana',
+          periodLabel: 'Esta semana'
+        };
+      case 'month':
+        return {
+          totalWorkouts: 16,
+          totalCalories: 7200,
+          totalHours: 12.8,
+          streak: 7,
+          progressPercent: 0.64,
+          nextGoal: 'Completar 20 entrenamientos este mes',
+          periodLabel: 'Este mes'
+        };
+      case 'year':
+        return {
+          totalWorkouts: 156,
+          totalCalories: 78000,
+          totalHours: 124.8,
+          streak: 7,
+          progressPercent: 0.52,
+          nextGoal: 'Completar 200 entrenamientos este año',
+          periodLabel: 'Este año'
+        };
+      default:
+        return {
+          totalWorkouts: 4,
+          totalCalories: 1800,
+          totalHours: 3.2,
+          streak: 7,
+          progressPercent: 0.75,
+          nextGoal: 'Completar 5 entrenamientos esta semana',
+          periodLabel: 'Esta semana'
+        };
+    }
   };
 
-  const workoutHistory = [
-    { date: '2024-01-15', type: 'Full Body', duration: '60 min', calories: 450 },
-    { date: '2024-01-14', type: 'Cardio', duration: '45 min', calories: 350 },
-    { date: '2024-01-12', type: 'Piernas', duration: '50 min', calories: 400 },
-  ];
+  const getWorkoutHistoryForPeriod = (period: string) => {
+    switch (period) {
+      case 'week':
+        return [
+          { date: '15/01/2024', type: 'Full Body', duration: '60 min', calories: 450 },
+          { date: '14/01/2024', type: 'Cardio', duration: '45 min', calories: 350 },
+          { date: '12/01/2024', type: 'Piernas', duration: '50 min', calories: 400 },
+          { date: '10/01/2024', type: 'Espalda', duration: '55 min', calories: 420 },
+        ];
+      case 'month':
+        return [
+          { date: 'Semana 3', type: 'Promedio', duration: '52 min', calories: 415 },
+          { date: 'Semana 2', type: 'Promedio', duration: '48 min', calories: 380 },
+          { date: 'Semana 1', type: 'Promedio', duration: '55 min', calories: 425 },
+        ];
+      case 'year':
+        return [
+          { date: 'Diciembre', type: 'Promedio', duration: '50 min', calories: 400 },
+          { date: 'Noviembre', type: 'Promedio', duration: '45 min', calories: 385 },
+          { date: 'Octubre', type: 'Promedio', duration: '52 min', calories: 410 },
+          { date: 'Septiembre', type: 'Promedio', duration: '48 min', calories: 395 },
+        ];
+      default:
+        return [];
+    }
+  };
 
-  const personalRecords = [
-    { exercise: 'Press Banca', weight: '80 kg', date: '2024-01-10', improvement: '+5kg' },
-    { exercise: 'Sentadilla', weight: '100 kg', date: '2024-01-08', improvement: '+7.5kg' },
-    { exercise: 'Peso Muerto', weight: '120 kg', date: '2024-01-15', improvement: '+10kg' },
-  ];
+  const getPersonalRecordsForPeriod = (period: string) => {
+    switch (period) {
+      case 'week':
+        return [
+          { exercise: 'Press Banca', weight: '80 kg', date: '10/01/2024', improvement: '+2.5kg' },
+          { exercise: 'Sentadilla', weight: '100 kg', date: '12/01/2024', improvement: '+5kg' },
+        ];
+      case 'month':
+        return [
+          { exercise: 'Press Banca', weight: '80 kg', date: '10/01/2024', improvement: '+7.5kg' },
+          { exercise: 'Sentadilla', weight: '100 kg', date: '08/01/2024', improvement: '+10kg' },
+          { exercise: 'Peso Muerto', weight: '120 kg', date: '15/01/2024', improvement: '+15kg' },
+        ];
+      case 'year':
+        return [
+          { exercise: 'Press Banca', weight: '80 kg', date: 'Enero 2024', improvement: '+20kg' },
+          { exercise: 'Sentadilla', weight: '100 kg', date: 'Marzo 2024', improvement: '+25kg' },
+          { exercise: 'Peso Muerto', weight: '120 kg', date: 'Mayo 2024', improvement: '+30kg' },
+          { exercise: 'Dominadas', weight: '+15 kg', date: 'Julio 2024', improvement: '+15kg' },
+        ];
+      default:
+        return [];
+    }
+  };
 
-  const achievements = [
-    { title: '¡Primera semana completada!', description: 'Has completado tu primera semana de entrenamiento', icon: 'trophy', earned: true },
-    { title: 'Maestro del peso', description: 'Has superado tu récord personal en press banca', icon: 'weight-lifter', earned: true },
-    { title: 'Corredor constante', description: '5 sesiones de cardio completadas', icon: 'run', earned: false },
-  ];
+  const getAchievementsForPeriod = (period: string) => {
+    const baseAchievements = [
+      { title: '¡Primera semana completada!', description: 'Has completado tu primera semana de entrenamiento', icon: 'trophy', earned: true },
+      { title: 'Maestro del peso', description: 'Has superado tu récord personal en press banca', icon: 'weight-lifter', earned: true },
+      { title: 'Corredor constante', description: '5 sesiones de cardio completadas', icon: 'run', earned: false },
+    ];
+
+    if (period === 'year') {
+      return [
+        ...baseAchievements,
+        { title: 'Atleta del año', description: 'Has completado más de 150 entrenamientos', icon: 'medal', earned: true },
+        { title: 'Máquina de quemar calorías', description: 'Has quemado más de 75,000 calorías', icon: 'fire', earned: true },
+      ];
+    }
+
+    return baseAchievements;
+  };
+
+  // Obtener datos dinámicos
+  const currentStats = getStatsForPeriod(timeRange);
+  const currentWorkoutHistory = getWorkoutHistoryForPeriod(timeRange);
+  const currentPersonalRecords = getPersonalRecordsForPeriod(timeRange);
+  const currentAchievements = getAchievementsForPeriod(timeRange);
 
   const onShareProgress = () => {
     alert('Función de compartir progreso aún no implementada.');
@@ -41,178 +150,246 @@ export default function ProgressScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={{ paddingBottom: 80 }}>
-        {/* Streak */}
-        <Surface style={styles.headerContainer} elevation={2}>
-          <View style={styles.streakContainer}>
-            <Icon name="fire" size={28} color="#ff8c00" />
-            <Text style={styles.streakText}>{userStats.streak} días seguidos</Text>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+        {/* Header Section - Estilo como Hero Section */}
+        <View style={styles.headerSection}>
+          <View style={styles.headerContent}>
+            <Text style={styles.headerTitle}>Tu progreso</Text>
+            <Text style={styles.headerSubtitle}>Sigue mejorando cada día</Text>
           </View>
-        </Surface>
+          <View style={styles.headerIcon}>
+            <Icon name="trending-up" size={32} color="#ffa500" />
+          </View>
+        </View>
+
+        {/* Streak Card - Solo se muestra en vista semanal */}
+        {timeRange === 'week' && (
+          <Card style={styles.streakCard}>
+            <Card.Content style={styles.streakContent}>
+              <View style={styles.streakContainer}>
+                <View style={styles.streakIconContainer}>
+                  <Icon name="fire" size={28} color="#ffa500" />
+                </View>
+                <View style={styles.streakInfo}>
+                  <Text style={styles.streakValue}>{currentStats.streak} días</Text>
+                  <Text style={styles.streakLabel}>Racha actual</Text>
+                </View>
+              </View>
+            </Card.Content>
+          </Card>
+        )}
 
         {/* Time Range Selector */}
-        <SegmentedButtons
-          value={timeRange}
-          onValueChange={setTimeRange}
-          buttons={[
-            { value: 'week', label: 'Semana' },
-            { value: 'month', label: 'Mes' },
-            { value: 'year', label: 'Año' },
-          ]}
-          style={styles.segmentedButtons}
-          theme={{
-            colors: {
-              secondaryContainer: '#ff8c00',
-              onSecondaryContainer: '#000',
-              primary: '#000',
-              onSurface: '#000',
-              outline: '#d2691e',
-            },
-          }}
-        />
+        <View style={styles.selectorSection}>
+          <Text style={styles.sectionTitle}>Período de tiempo</Text>
+          <SegmentedButtons
+            value={timeRange}
+            onValueChange={setTimeRange}
+            buttons={[
+              { value: 'week', label: 'Semana' },
+              { value: 'month', label: 'Mes' },
+              { value: 'year', label: 'Año' },
+            ]}
+            style={styles.segmentedButtons}
+            theme={{
+              colors: {
+                secondaryContainer: '#ffa500',
+                onSecondaryContainer: '#000',
+                primary: '#000',
+                onSurface: '#000',
+                outline: '#ffa500',
+              },
+            }}
+          />
+        </View>
 
         {/* Progress Summary */}
-        <Surface style={styles.progressSummary} elevation={2}>
-          <Text style={styles.summaryTitle}>¡Estás mejorando!</Text>
-          <Text style={styles.summaryText}>Has completado el {Math.round(userStats.progressPercent * 100)}% de tu objetivo semanal.</Text>
-          <ProgressBar progress={userStats.progressPercent} color="#d2691e" style={{ height: 10, borderRadius: 5, marginTop: 8 }} />
-          <Text style={styles.nextGoal}>Siguiente meta: {userStats.nextGoal}</Text>
-          <Button 
-            mode="outlined" 
-            onPress={onShareProgress} 
-            textColor="#d2691e" 
-            style={styles.shareButton}
-            uppercase={false}
-          >
-            Compartir progreso
-          </Button>
-        </Surface>
-
-        {/* Key Stats */}
-        <Surface style={styles.statsContainer} elevation={3}>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Icon name="fire" size={32} color="#fff" />
-              <Text style={styles.statValue}>{userStats.totalCalories}</Text>
-              <Text style={styles.statLabel}>Calorías</Text>
+        <Card style={styles.progressCard}>
+          <Card.Content style={styles.progressContent}>
+            <View style={styles.progressHeader}>
+              <Text style={styles.progressTitle}>¡Estás mejorando!</Text>
+              <Icon name="chart-line" size={24} color="#4CAF50" />
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Icon name="clock-outline" size={32} color="#fff" />
-              <Text style={styles.statValue}>{userStats.totalHours}h</Text>
-              <Text style={styles.statLabel}>Tiempo Total</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Icon name="dumbbell" size={32} color="#fff" />
-              <Text style={styles.statValue}>{userStats.totalWorkouts}</Text>
-              <Text style={styles.statLabel}>Entrenamientos</Text>
-            </View>
-          </View>
-        </Surface>
-
-        {/* Achievements */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Logros Desbloqueados</Text>
-            <List.Section>
-              {achievements.map((ach, i) => (
-                <List.Item
-                  key={i}
-                  title={ach.title}
-                  titleStyle={{ color: '#000', fontWeight: '700' }}
-                  description={ach.description}
-                  descriptionStyle={{ color: '#000' }}
-                  left={props => (
-                    <List.Icon {...props} icon={ach.icon} color={ach.earned ? "#d2691e" : "#a9a9a9"} />
-                  )}
-                />
-              ))}
-            </List.Section>
-          </Card.Content>
-        </Card>
-
-        {/* Personal Records */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Récords Personales</Text>
-            <DataTable>
-              <DataTable.Header>
-                <DataTable.Title textStyle={{ color: '#000', fontWeight: '700' }}>Ejercicio</DataTable.Title>
-                <DataTable.Title numeric textStyle={{ color: '#000', fontWeight: '700' }}>Peso</DataTable.Title>
-                <DataTable.Title numeric textStyle={{ color: '#000', fontWeight: '700' }}>Mejora</DataTable.Title>
-              </DataTable.Header>
-              {personalRecords.map((record, i) => (
-                <DataTable.Row key={i}>
-                  <DataTable.Cell textStyle={{ color: '#000' }}>{record.exercise}</DataTable.Cell>
-                  <DataTable.Cell numeric textStyle={{ color: '#000' }}>{record.weight}</DataTable.Cell>
-                  <DataTable.Cell numeric textStyle={{ fontWeight: '700', color: '#228B22' }}>
-                    {record.improvement}
-                  </DataTable.Cell>
-                </DataTable.Row>
-              ))}
-            </DataTable>
-          </Card.Content>
-        </Card>
-
-        {/* Workout History */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <Text style={styles.sectionTitle}>Historial de Entrenamientos</Text>
-            <DataTable>
-              <DataTable.Header>
-                <DataTable.Title textStyle={{ color: '#000', fontWeight: '700' }}>Fecha</DataTable.Title>
-                <DataTable.Title textStyle={{ color: '#000', fontWeight: '700' }}>Tipo</DataTable.Title>
-                <DataTable.Title numeric textStyle={{ color: '#000', fontWeight: '700' }}>Duración</DataTable.Title>
-                <DataTable.Title numeric textStyle={{ color: '#000', fontWeight: '700' }}>Calorías</DataTable.Title>
-              </DataTable.Header>
-              {workoutHistory.map((workout, i) => (
-                <DataTable.Row key={i}>
-                  <DataTable.Cell textStyle={{ color: '#000' }}>{workout.date}</DataTable.Cell>
-                  <DataTable.Cell textStyle={{ color: '#000' }}>{workout.type}</DataTable.Cell>
-                  <DataTable.Cell numeric textStyle={{ color: '#000' }}>{workout.duration}</DataTable.Cell>
-                  <DataTable.Cell numeric textStyle={{ color: '#000' }}>{workout.calories}</DataTable.Cell>
-                </DataTable.Row>
-              ))}
-            </DataTable>
-            <Button
-              mode="contained"
-              onPress={() => {}}
-              style={styles.viewMoreButton}
-              buttonColor="#d2691e"
-              textColor="#000"
-              uppercase={false}
+            <Text style={styles.progressText}>
+              Has completado el {Math.round(currentStats.progressPercent * 100)}% de tu objetivo {timeRange === 'week' ? 'semanal' : timeRange === 'month' ? 'mensual' : 'anual'}.
+            </Text>
+            <ProgressBar 
+              progress={currentStats.progressPercent} 
+              color="#ffa500" 
+              style={styles.progressBar}
+            />
+            <Text style={styles.nextGoal}>Siguiente meta: {currentStats.nextGoal}</Text>
+            <Button 
+              mode="outlined" 
+              onPress={onShareProgress} 
+              style={styles.shareButton}
+              labelStyle={styles.shareButtonText}
+              icon={() => <Icon name="share" size={16} color="#ffa500" />}
             >
-              Ver más
+              Compartir progreso
             </Button>
           </Card.Content>
         </Card>
+
+        {/* Key Stats */}
+        <Card style={styles.statsCard}>
+          <Card.Content style={styles.statsContent}>
+            <View style={styles.statsHeader}>
+              <Text style={styles.statsTitle}>{currentStats.periodLabel}</Text>
+              <Icon name="chart-box" size={24} color="#ffa500" />
+            </View>
+            <View style={styles.statsGrid}>
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="fire" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>{currentStats.totalCalories.toLocaleString()}</Text>
+                <Text style={styles.statLabel}>Calorías</Text>
+              </View>
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="clock-outline" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>{currentStats.totalHours}h</Text>
+                <Text style={styles.statLabel}>Tiempo Total</Text>
+              </View>
+              <View style={styles.statBox}>
+                <View style={styles.statIconContainer}>
+                  <Icon name="dumbbell" size={20} color="#ffa500" />
+                </View>
+                <Text style={styles.statValue}>{currentStats.totalWorkouts}</Text>
+                <Text style={styles.statLabel}>Entrenamientos</Text>
+              </View>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Achievements */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Logros {timeRange === 'week' ? 'de la Semana' : timeRange === 'month' ? 'del Mes' : 'del Año'}
+          </Text>
+          <Card style={styles.achievementsCard}>
+            <Card.Content style={styles.achievementsContent}>
+              {currentAchievements.map((ach, i) => (
+                <React.Fragment key={i}>
+                  <View style={styles.achievementItem}>
+                    <View style={styles.achievementIconContainer}>
+                      <Icon 
+                        name={ach.icon} 
+                        size={24} 
+                        color={ach.earned ? "#ffa500" : "#999"} 
+                      />
+                    </View>
+                    <View style={styles.achievementInfo}>
+                      <Text style={[styles.achievementTitle, { opacity: ach.earned ? 1 : 0.5 }]}>
+                        {ach.title}
+                      </Text>
+                      <Text style={[styles.achievementDescription, { opacity: ach.earned ? 1 : 0.5 }]}>
+                        {ach.description}
+                      </Text>
+                    </View>
+                  </View>
+                  {i < currentAchievements.length - 1 && <Divider style={styles.divider} />}
+                </React.Fragment>
+              ))}
+            </Card.Content>
+          </Card>
+        </View>
+
+        {/* Personal Records */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Récords {timeRange === 'week' ? 'de la Semana' : timeRange === 'month' ? 'del Mes' : 'del Año'}
+          </Text>
+          <Card style={styles.recordsCard}>
+            <Card.Content style={styles.recordsContent}>
+              <DataTable>
+                <DataTable.Header>
+                  <DataTable.Title textStyle={styles.tableHeader}>Ejercicio</DataTable.Title>
+                  <DataTable.Title numeric textStyle={styles.tableHeader}>Peso</DataTable.Title>
+                  <DataTable.Title numeric textStyle={styles.tableHeader}>Mejora</DataTable.Title>
+                </DataTable.Header>
+                {currentPersonalRecords.map((record, i) => (
+                  <DataTable.Row key={i}>
+                    <DataTable.Cell textStyle={styles.tableCell}>{record.exercise}</DataTable.Cell>
+                    <DataTable.Cell numeric textStyle={styles.tableCell}>{record.weight}</DataTable.Cell>
+                    <DataTable.Cell numeric textStyle={styles.improvementCell}>
+                      {record.improvement}
+                    </DataTable.Cell>
+                  </DataTable.Row>
+                ))}
+              </DataTable>
+            </Card.Content>
+          </Card>
+        </View>
+
+        {/* Workout History */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Historial {timeRange === 'week' ? 'Semanal' : timeRange === 'month' ? 'Mensual' : 'Anual'}
+          </Text>
+          <Card style={styles.historyCard}>
+            <Card.Content style={styles.historyContent}>
+              <DataTable>
+                <DataTable.Header>
+                  <DataTable.Title textStyle={styles.tableHeader}>
+                    {timeRange === 'week' ? 'Fecha' : 'Período'}
+                  </DataTable.Title>
+                  <DataTable.Title textStyle={styles.tableHeader}>Tipo</DataTable.Title>
+                  <DataTable.Title numeric textStyle={styles.tableHeader}>Duración</DataTable.Title>
+                  <DataTable.Title numeric textStyle={styles.tableHeader}>Calorías</DataTable.Title>
+                </DataTable.Header>
+                {currentWorkoutHistory.map((workout, i) => (
+                  <DataTable.Row key={i}>
+                    <DataTable.Cell textStyle={styles.tableCell}>{workout.date}</DataTable.Cell>
+                    <DataTable.Cell textStyle={styles.tableCell}>{workout.type}</DataTable.Cell>
+                    <DataTable.Cell numeric textStyle={styles.tableCell}>{workout.duration}</DataTable.Cell>
+                    <DataTable.Cell numeric textStyle={styles.tableCell}>{workout.calories}</DataTable.Cell>
+                  </DataTable.Row>
+                ))}
+              </DataTable>
+              <Button
+                mode="contained"
+                onPress={() => {}}
+                style={styles.viewMoreButton}
+                labelStyle={styles.viewMoreButtonText}
+              >
+                Ver historial completo
+              </Button>
+            </Card.Content>
+          </Card>
+        </View>
       </ScrollView>
 
-      {/* Barra de navegación inferior fija */}
+      {/* Bottom Navigation - Estilo idéntico a otras pantallas */}
       <View style={styles.bottomBar}>
         <IconButton
           icon="home"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('HomeScreen')}
         />
         <IconButton
           icon="calendar"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('ClassBooking')}
         />
         <IconButton
           icon="chart-line"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="#FFFFFF"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('ProgressScreen')}
         />
         <IconButton
           icon="dumbbell"
-          size={32}
-          iconColor="white"
+          size={28}
+          iconColor="rgba(255, 255, 255, 0.7)"
+          style={styles.bottomBarButton}
           onPress={() => navigation.navigate('Routines')}
         />
       </View>
@@ -223,162 +400,344 @@ export default function ProgressScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5dc',
-  },
-  header: {
-    height: 56,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    elevation: 4,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#111',
+    backgroundColor: '#f5f5dc', 
   },
   scrollContainer: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
   },
-  headerContainer: {
-    marginVertical: 16,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  // Header Section - Estilo Hero Section como HomeScreen
+  headerSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 16,
+    borderRadius: 0, 
+  },
+  headerContent: {
+    flex: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#666666',
+    fontWeight: '400',
+  },
+  headerIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Header Button
+  headerButton: {
+    marginRight: 8,
+  },
+
+  // Sections
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 16,
+    marginHorizontal: 20,
+  },
+  selectorSection: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+
+  // Streak Card
+  streakCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
     elevation: 2,
-    borderRadius: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  streakContent: {
+    padding: 20,
   },
   streakContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
   },
-  streakText: {
-    marginLeft: 10,
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
+  streakIconContainer: {
+    width: 50,
+    height: 50,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
   },
-  segmentedButtons: {
-    marginHorizontal: 16,
-    backgroundColor: '#f5f5dc',
-    borderRadius: 0,
-    marginBottom: 12,
+  streakInfo: {
+    flex: 1,
   },
-  progressSummary: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginBottom: 20,
-    padding: 16,
-    elevation: 2,
-    borderRadius: 0,
-  },
-  summaryTitle: {
+  streakValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#d2691e',
+    color: '#1A1A1A',
   },
-  summaryText: {
-    fontSize: 16,
-    marginTop: 6,
-    color: '#000',
+  streakLabel: {
+    fontSize: 14,
+    color: '#666666',
+    marginTop: 2,
+  },
+
+  // Segmented Buttons
+  segmentedButtons: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+  },
+
+  // Progress Card
+  progressCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  progressContent: {
+    padding: 20,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  progressTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+  },
+  progressText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 16,
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 0, 
+    marginBottom: 12,
   },
   nextGoal: {
-    marginTop: 10,
     fontSize: 14,
     fontWeight: '600',
-    color: '#d2691e',
+    color: '#ffa500',
+    marginBottom: 16,
   },
   shareButton: {
-    marginTop: 14,
+    borderColor: '#ffa500',
     borderRadius: 0,
-    borderColor: '#d2691e',
-    borderWidth: 1,
+    alignSelf: 'flex-start',
   },
-  statsContainer: {
-    marginHorizontal: 16,
+  shareButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffa500',
+  },
+
+  // Stats Card - Estilo como HomeScreen
+  statsCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  statsContent: {
+    padding: 20,
+  },
+  statsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 20,
-    padding: 16,
-    backgroundColor: '#ffa500',
-    elevation: 3,
-    borderRadius: 0,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
   },
   statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
-  statItem: {
-    flex: 1,
+  statBox: {
     alignItems: 'center',
+    flex: 1,
   },
-  statDivider: {
-    width: 1,
-    height: 50,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    marginHorizontal: 12,
+  statIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
   },
   statValue: {
-    fontSize: 26,
-    fontWeight: '800',
-    marginTop: 10,
-    color: '#000',
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#000',
-    marginTop: 4,
-  },
-  card: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginBottom: 20,
-    elevation: 2,
-    borderRadius: 0,
-  },
-  sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#000',
-    marginBottom: 16,
+    color: '#1A1A1A',
+    marginBottom: 4,
   },
-  dataHeader: {
-    color: '#000',
-    fontWeight: '700',
+  statLabel: {
+    fontSize: 12,
+    color: '#666666',
+    fontWeight: '500',
   },
-  viewMoreButton: {
-    marginTop: 16,
-    borderRadius: 0,
-    backgroundColor: '#ffa500',
+
+  // Achievements Card
+  achievementsCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  achievementsContent: {
+    padding: 20,
+  },
+  achievementItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  achievementIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 165, 0, 0.1)',
+    borderRadius: 0, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  achievementInfo: {
+    flex: 1,
   },
   achievementTitle: {
-    color: '#000',
+    fontSize: 16,
     fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 2,
   },
   achievementDescription: {
-    color: '#000',
+    fontSize: 14,
+    color: '#666666',
   },
-  achievementLocked: {
-    color: '#a9a9a9',
+
+  // Records and History Cards
+  recordsCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0, 
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  improvement: {
-    color: '#228B22',
+  recordsContent: {
+    padding: 20,
   },
+  historyCard: {
+    marginHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 0,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  historyContent: {
+    padding: 20,
+  },
+  tableHeader: {
+    color: '#1A1A1A',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  tableCell: {
+    color: '#1A1A1A',
+    fontSize: 14,
+  },
+  improvementCell: {
+    fontWeight: '700',
+    color: '#4CAF50',
+    fontSize: 14,
+  },
+  viewMoreButton: {
+    backgroundColor: '#ffa500',
+    borderRadius: 0, 
+    marginTop: 16,
+    alignSelf: 'flex-start',
+  },
+  viewMoreButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#000000',
+  },
+
+  // Divider
+  divider: {
+    backgroundColor: '#E0E0E0',
+    marginVertical: 8,
+  },
+
+  // Bottom Bar - Estilo idéntico a otras pantallas
   bottomBar: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 64,
-    backgroundColor: '#b8860b',
+    height: 70,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 0, 
     flexDirection: 'row',
-    justifyContent: 'space-around',
     alignItems: 'center',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
     borderTopWidth: 1,
-    borderColor: '#eee',
-    zIndex: 100,
-    elevation: 10,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  bottomBarButton: {
+    margin: 0,
   },
 });

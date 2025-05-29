@@ -61,8 +61,8 @@ const AppNavigator = () => {
           headerRight: () => (
             <IconButton
               icon="account-circle"
-              size={24}
-              iconColor="#000000"
+              size={28}
+              iconColor="#ffa500"
               onPress={() => navigation.navigate('Profile')}
               style={{ marginRight: 8 }}
             />
@@ -82,20 +82,103 @@ const AppNavigator = () => {
                   </View>
                 ),
                 headerShown: true,
+                title: 'Inicio',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A'
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               }}
             />
-            <Stack.Screen name="ChatList" component={ChatListScreen} options={{ headerShown: true, title: 'Chats' }} />
-            <Stack.Screen name="NewChat" component={NewChatScreen} options={{ headerShown: true, title: 'Nuevo Chat' }} />
+            <Stack.Screen 
+              name="ChatList" 
+              component={ChatListScreen} 
+              options={{ 
+                headerShown: true, 
+                title: 'Chats',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }} 
+            />
+            <Stack.Screen 
+              name="NewChat" 
+              component={NewChatScreen} 
+              options={{ 
+                headerShown: true, 
+                title: 'Nuevo Chat',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }} 
+            />
             <Stack.Screen
               name="Chat"
               component={ChatScreen}
               options={({ route }: { route: RouteProp<MainStackParamList, 'Chat'> }) => ({
                 headerShown: true,
-                title: route.params.chatName ?? 'Chat'
+                title: route.params.chatName ?? 'Chat',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               })}
             />
-            <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ headerShown: true, title: 'Nutrición' }} />
-            <Stack.Screen name="PersonalizedTraining" component={PersonalizedTrainingScreen} options={{ headerShown: true, title: 'Entrenamiento Personalizado' }} />
+            <Stack.Screen 
+              name="Nutrition" 
+              component={NutritionScreen} 
+              options={{ 
+                headerShown: true, 
+                title: 'Nutrición',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }} 
+            />
+            <Stack.Screen 
+              name="PersonalizedTraining" 
+              component={PersonalizedTrainingScreen} 
+              options={{ 
+                headerShown: true, 
+                title: 'Entrenamiento Personalizado',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }} 
+            />
             <Stack.Screen
               name="ClassBooking"
               component={ClassBookingScreen}
@@ -103,9 +186,14 @@ const AppNavigator = () => {
                 headerShown: true,
                 title: 'Reservar Clases',
                 headerStyle: {
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1A1A1A',
                 },
-                headerTintColor: '#000',
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               }}
             />
             <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -116,9 +204,14 @@ const AppNavigator = () => {
                 headerShown: true,
                 title: 'Rutinas',
                 headerStyle: {
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1A1A1A',
                 },
-                headerTintColor: '#000',
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               }}
             />
             <Stack.Screen
@@ -128,9 +221,14 @@ const AppNavigator = () => {
                 headerShown: true,
                 title: 'Progreso',
                 headerStyle: {
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1A1A1A',
                 },
-                headerTintColor: '#000',
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               }}
             />
             <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
@@ -141,10 +239,35 @@ const AppNavigator = () => {
               component={IAChatListScreen}
               options={({ route }) => ({
                 headerShown: true,
-                title: route.params?.chatType === 'training' ? 'Chat Entrenamiento' : 'Chat Nutrición'
+                title: route.params?.chatType === 'training' ? 'Chat Entrenamiento' : 'Chat Nutrición',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
               })}
             />
-            <Stack.Screen name="IAChatDetail" component={IAChatDetailScreen} options={({ route }) => ({ headerShown: true, title: route.params.chatTitle })} />
+            <Stack.Screen 
+              name="IAChatDetail" 
+              component={IAChatDetailScreen} 
+              options={({ route }) => ({ 
+                headerShown: true, 
+                title: route.params.chatTitle,
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              })} 
+            />
           </>
         ) : (
           <Stack.Screen name="Login" component={Login}
@@ -160,7 +283,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   }
 });
-
 
 export default AppNavigator;
 
