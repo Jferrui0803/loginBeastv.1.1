@@ -9,7 +9,7 @@ import { Text, Card } from 'react-native-paper';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
-import { jwtDecode } from 'jwt-decode'; 
+import { jwtDecode } from 'jwt-decode';
 
 interface Clase {
   id: string;
@@ -33,11 +33,21 @@ interface JwtPayload {
   exp: number;
 }
 
-// Permitir recarga desde el padre (HomeScreen)
 const ClassesSection: React.FC<{ reloadTrigger?: number }> = ({ reloadTrigger }) => {
   const [clases, setClases] = useState<Clase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const formatearFecha = (isoDate: string) => {
+    const fecha = new Date(isoDate);
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getFullYear();
+    const horas = fecha.getHours().toString().padStart(2, '0');
+    const minutos = fecha.getMinutes().toString().padStart(2, '0');
+
+    return `${dia}/${mes}/${año} ${horas}:${minutos}`;
+  };
 
   const fetchClases = async () => {
     try {
@@ -87,17 +97,16 @@ const ClassesSection: React.FC<{ reloadTrigger?: number }> = ({ reloadTrigger })
       <Text style={styles.sectionTitle}>Clases disponibles</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {clases.map((clase) => {
-          const hora = new Date(clase.startTime).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          });
+
 
           return (
             <Card key={clase.id} style={styles.classCard}>
               <Card.Cover source={require('../../assets/class-placeholder.jpg')} />
               <Card.Content>
                 <Text variant="titleMedium" style={styles.text}>{clase.name}</Text>
-                <Text variant="bodySmall" style={styles.text}>Próxima clase: {hora}</Text>
+                <Text variant="bodySmall" style={styles.text}>
+                  {formatearFecha(clase.startTime)}
+                </Text>
                 <Text variant="bodySmall" style={styles.text}>Gimnasio: {clase.gym.name}</Text>
               </Card.Content>
             </Card>
