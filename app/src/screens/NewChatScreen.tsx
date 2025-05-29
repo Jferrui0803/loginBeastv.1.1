@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { List, ActivityIndicator, Text, Modal, Portal, Button, TextInput } from 'react-native-paper';
 import axios from 'axios';
-import { API_URL } from '../../context/AuthContext';
+import { API_URL, useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -21,6 +21,7 @@ interface UserItem {
 }
 
 export default function NewChatScreen() {
+  const { authState } = useAuth(); // Obtiene el usuario actual
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,10 +32,14 @@ export default function NewChatScreen() {
 
   useEffect(() => {
     axios.get(`${API_URL}/api/users`)
-      .then(res => setUsers(res.data))
+      .then(res => {
+        // Filtra el usuario actual
+        const filtered = res.data.filter((u: UserItem) => u.id !== authState?.userId);
+        setUsers(filtered);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  }, [authState?.userId]);
 
   const handleUserPress = (user: UserItem) => {
     setSelectedUser(user);
