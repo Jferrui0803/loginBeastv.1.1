@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Modal, Image, TouchableOpacity } from 'react-native';
 import { Text, Card, Button, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -54,6 +54,15 @@ const WorkoutDetailScreen = () => {
         },
     ];
 
+    const [infoVisible, setInfoVisible] = React.useState<number | null>(null);
+
+    const exerciseImages: { [key: number]: any } = {
+        0: require('../../assets/sentadilla.jpg'), 
+        1: require('../../assets/press-banca.jpg'), 
+        2: require('../../assets/peso-muerto.jpg'), 
+        3: require('../../assets/dominada.jpg'), 
+    };
+
     const renderWorkoutHeader = () => (
         <Card style={styles.workoutCard}>
             <View style={styles.cardImageContainer}>
@@ -104,6 +113,9 @@ const WorkoutDetailScreen = () => {
                                     <Text style={styles.exerciseName}>{exercise.name}</Text>
                                     <Text style={styles.exerciseMuscles}>{exercise.muscles}</Text>
                                 </View>
+                                <TouchableOpacity onPress={() => setInfoVisible(index)} style={styles.infoButton}>
+                                    <Icon name="information-outline" size={22} color="#ffa500" />
+                                </TouchableOpacity>
                             </View>
                             <View style={styles.exerciseStats}>
                                 <View style={styles.exerciseStatItem}>
@@ -124,6 +136,27 @@ const WorkoutDetailScreen = () => {
                     ))}
                 </Card.Content>
             </Card>
+            <Modal
+                visible={infoVisible !== null}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setInfoVisible(null)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity style={styles.modalClose} onPress={() => setInfoVisible(null)}>
+                            <Icon name="close" size={28} color="#ffa500" />
+                        </TouchableOpacity>
+                        {infoVisible !== null && (
+                            <Image
+                                source={exerciseImages[infoVisible]}
+                                style={styles.modalImage}
+                                resizeMode="contain"
+                            />
+                        )}
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 
@@ -421,6 +454,36 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         letterSpacing: 0.5,
         color: '#000000',
+    },
+    infoButton: {
+        marginLeft: 8,
+        padding: 4,
+        alignSelf: 'flex-start',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+        maxWidth: '90%',
+        maxHeight: '80%',
+    },
+    modalImage: {
+        width: 250,
+        height: 250,
+        marginTop: 12,
+    },
+    modalClose: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        zIndex: 2,
     },
 });
 
