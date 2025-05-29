@@ -47,6 +47,8 @@ type MainStackParamList = {
   EditProfile: { user: User }
 };
 
+export type { MainStackParamList };
+
 // Crear stack tipado
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -285,5 +287,3 @@ const styles = StyleSheet.create({
 });
 
 export default AppNavigator;
-
-export { AppNavigator };

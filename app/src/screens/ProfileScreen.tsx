@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/AppNavigator';
+import * as ImagePicker from 'expo-image-picker';
 
 interface User {
   id: string;
@@ -26,6 +27,7 @@ interface User {
   createdAt: string;
   updatedAt: string;
   gymId: string | null;
+  avatarUrl?: string; // Añadido para la URL del avatar
 }
 
 interface JwtPayload {
@@ -44,6 +46,8 @@ export default function ProfileScreen() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchUser = useCallback(async () => {
     setLoading(true);
@@ -77,6 +81,57 @@ export default function ProfileScreen() {
       fetchUser();
     }, [fetchUser])
   );
+
+  // Seleccionar imagen de la galería
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permiso denegado para acceder a la galería.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: 'images', // Valor correcto para evitar warning y error
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const uri = result.assets[0].uri;
+      setProfileImage(uri);
+      await uploadImage(uri);
+    }
+  };
+
+  // Subir imagen al backend
+  const uploadImage = async (uri: string) => {
+    try {
+      setUploading(true);
+      const token = await SecureStore.getItemAsync('userToken');
+      if (!token || !user) throw new Error('No autenticado');
+      const formData = new FormData();
+      formData.append('avatar', {
+        uri,
+        name: 'profile.jpg',
+        type: 'image/jpeg',
+      } as any);
+      await axios.post(`${API_URL}/api/users/${user.id}/avatar`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setProfileImage(null); // Limpiar imagen local para forzar recarga desde backend
+      fetchUser(); // Refresca los datos del usuario
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.message) {
+        alert('Error al subir la imagen: ' + err.response.data.message);
+      } else {
+        alert('Error al subir la imagen: ' + (err.message || 'Error desconocido'));
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -116,15 +171,29 @@ export default function ProfileScreen() {
         <Card style={styles.profileCard}>
           <Card.Content style={styles.profileContent}>
             <View style={styles.avatarContainer}>
-              <Avatar.Icon 
-                size={100} 
-                icon="account" 
-                style={styles.avatar}
-                color="#000000"
-              />
-              <TouchableOpacity style={styles.changePhotoButton}>
+              {profileImage || user?.avatarUrl ? (
+                <Avatar.Image
+                  size={100}
+                  source={{
+                    uri: profileImage || (user?.avatarUrl
+                      ? user.avatarUrl.startsWith('http')
+                        ? user.avatarUrl
+                        : `${API_URL}${user.avatarUrl}`
+                      : undefined)
+                  }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <Avatar.Icon 
+                  size={100} 
+                  icon="account" 
+                  style={styles.avatar}
+                  color="#000000"
+                />
+              )}
+              <TouchableOpacity style={styles.changePhotoButton} onPress={pickImage} disabled={uploading}>
                 <Icon name="camera" size={16} color="#ffa500" />
-                <Text style={styles.changePhotoText}>Cambiar foto</Text>
+                <Text style={styles.changePhotoText}>{uploading ? 'Subiendo...' : 'Cambiar foto'}</Text>
               </TouchableOpacity>
             </View>
             
