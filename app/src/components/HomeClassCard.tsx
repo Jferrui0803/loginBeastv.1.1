@@ -122,7 +122,9 @@ const styles = StyleSheet.create({
   },
   classCard: {
     width: 200,
+    height: 315,
     marginRight: 12,
+    justifyContent: 'flex-start',
   },
   text: {
     color: 'black',
