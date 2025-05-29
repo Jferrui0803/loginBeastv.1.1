@@ -22,7 +22,7 @@ interface ChatItem {
   type: string;
   otherUserName?: string; // nombre del otro usuario
   lastMessage?: string;   // último mensaje del chat
-  // add more fields if needed
+  hasUnread?: boolean; // Nuevo campo para notificación
 }
 
 const styles = StyleSheet.create({
@@ -61,6 +61,14 @@ const styles = StyleSheet.create({
   },
   listItem: {
     backgroundColor: '#fff',
+  },
+  unreadDot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#ffa500',
+    marginRight: 12,
+    alignSelf: 'center',
   },
 });
 
@@ -146,6 +154,9 @@ const SwipeableChatItem = ({
           description={item.lastMessage || ''}
           onPress={onPress}
           left={props => <List.Icon {...props} icon="chat" />}
+          right={() => item.hasUnread ? (
+            <View style={styles.unreadDot} />
+          ) : null}
           style={styles.listItem}
         />
       </Animated.View>
@@ -173,7 +184,7 @@ export default function ChatListScreen() {
     socket.on('receive-message', (message) => {
       setChats(prevChats => prevChats.map(chat =>
         chat.id === message.chatId
-          ? { ...chat, lastMessage: message.content }
+          ? { ...chat, lastMessage: message.content, hasUnread: true }
           : chat
       ));
     });
@@ -214,6 +225,13 @@ export default function ChatListScreen() {
     } catch {}
   };
 
+  const handleChatPress = (chatId: string, chatName?: string) => {
+    setChats(prevChats => prevChats.map(chat =>
+      chat.id === chatId ? { ...chat, hasUnread: false } : chat
+    ));
+    navigation.navigate('Chat', { chatId, chatName });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {loading ? (
@@ -230,7 +248,7 @@ export default function ChatListScreen() {
           renderItem={({ item }) => (
             <SwipeableChatItem
               item={item}
-              onPress={() => navigation.navigate('Chat', { chatId: item.id, chatName: item.otherUserName || `Chat: ${item.id}` })}
+              onPress={() => handleChatPress(item.id, item.otherUserName || `Chat: ${item.id}`)}
               onDelete={() => deleteChat(item.id)}
             />
           )}
