@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -12,13 +12,16 @@ import * as SecureStore from 'expo-secure-store';
 import { API_URL, useAuth } from '../../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation } from '@react-navigation/native';
-
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { MainStackParamList } from '../../navigation/AppNavigator';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  phone: string;
+  birthday: string;
   role: string;
   createdAt: string;
   updatedAt: string;
@@ -28,42 +31,52 @@ interface User {
 interface JwtPayload {
   id: string;
   email: string;
+  phone: string;
+  birthday: string;
   role: string;
   gymId?: string;
   exp: number;
 }
 
 export default function ProfileScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
   const { onLogout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = await SecureStore.getItemAsync('userToken');
-        if (!token) throw new Error('Token no encontrado.');
+  const fetchUser = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = await SecureStore.getItemAsync('userToken');
+      if (!token) throw new Error('Token no encontrado.');
 
-        const decoded = jwtDecode<JwtPayload>(token);
+      const decoded = jwtDecode<JwtPayload>(token);
 
-        const { data } = await axios.get<User>(`${API_URL}/api/users/${decoded.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      const { data } = await axios.get<User>(`${API_URL}/api/users/${decoded.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        setUser(data);
-      } catch (err: any) {
-        setError(err.message ?? 'Error al cargar el usuario');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
+      setUser(data);
+    } catch (err: any) {
+      setError(err.message ?? 'Error al cargar el usuario');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchUser();
+    }, [fetchUser])
+  );
 
   if (loading) {
     return (
@@ -98,12 +111,14 @@ export default function ProfileScreen() {
         <Card.Content>
           <View style={styles.infoRow}>
             <Icon name="phone" size={20} color="#ffa500" />
-            <Text style={styles.infoText}>+34 XXX XXX XXX</Text>
+            <Text style={styles.infoText}>Telefono: {user?.phone}</Text>
           </View>
           <Divider style={styles.divider} />
           <View style={styles.infoRow}>
             <Icon name="calendar" size={20} color="#ffa500" />
-            <Text style={styles.infoText}>Fecha de nacimiento: DD/MM/AAAA</Text>
+            <Text style={styles.infoText}>
+              Fecha de nacimiento: {user?.birthday ? new Date(user.birthday).toLocaleDateString('es-ES') : ''}
+            </Text>
           </View>
           <Divider style={styles.divider} />
           <View style={styles.infoRow}>
@@ -139,7 +154,11 @@ export default function ProfileScreen() {
           <Button
             mode="contained-tonal"
             icon="account-edit"
-            onPress={() => console.log('Editar perfil')}
+            onPress={() => {
+              if (user) {
+                navigation.navigate('EditProfile', { user });
+              }
+            }}
             buttonColor="#ffa500"
             textColor="black"
             style={styles.actionButton}
