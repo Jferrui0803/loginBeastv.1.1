@@ -191,17 +191,28 @@ export default function ChatListScreen() {
           : chat
       ));
     });
+
+    // Escuchar el evento 'new-chat' para agregar el chat en tiempo real
+    socket.on('new-chat', (newChat) => {
+      setChats(prevChats => {
+        if (prevChats.some(chat => chat.id === newChat.id)) return prevChats;
+        return [newChat, ...prevChats];
+      });
+    });
     return () => {
       socket.disconnect();
     };
   }, [authState?.userId, authState?.token]);
 
   useEffect(() => {
-    if (isFocused && activeChatId) {
-      setChats(prevChats => prevChats.map(chat =>
-        chat.id === activeChatId ? { ...chat, hasUnread: false } : chat
-      ));
-      setActiveChatId(null);
+    if (isFocused) {
+      loadChats();
+      if (activeChatId) {
+        setChats(prevChats => prevChats.map(chat =>
+          chat.id === activeChatId ? { ...chat, hasUnread: false } : chat
+        ));
+        setActiveChatId(null);
+      }
     }
   }, [isFocused]);
 
