@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Share } from 'react-native';
 import { Surface, SegmentedButtons, Card, DataTable, Button, List, Divider, ProgressBar, Portal, Modal, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -144,8 +144,15 @@ export default function ProgressScreen() {
   const currentPersonalRecords = getPersonalRecordsForPeriod(timeRange);
   const currentAchievements = getAchievementsForPeriod(timeRange);
 
-  const onShareProgress = () => {
-    alert('Función de compartir progreso aún no implementada.');
+  const onShareProgress = async () => {
+    try {
+      const message = `¡Mira mi progreso en el gym!\n\n${currentStats.periodLabel}:\n- Entrenamientos: ${currentStats.totalWorkouts}\n- Calorías: ${currentStats.totalCalories}\n- Tiempo total: ${currentStats.totalHours}h\n- Racha: ${currentStats.streak} días\n\nSiguiente meta: ${currentStats.nextGoal}`;
+      await Share.share({
+        message,
+      });
+    } catch (error) {
+      alert('No se pudo compartir el progreso.');
+    }
   };
 
   return (
