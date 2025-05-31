@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
-import { View, StyleSheet, ScrollView, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { View, StyleSheet, ScrollView, Alert, Keyboard, TouchableWithoutFeedback, Image, TouchableOpacity } from 'react-native';
 import { Text, Card, Button, IconButton, Surface, Chip, Portal, Modal, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +17,19 @@ type RootStackParamList = {
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const exerciseImages = [
+  require('../../assets/sentadilla.jpg'),
+  require('../../assets/press-banca.jpg'),
+  require('../../assets/peso-muerto.jpg'),
+  require('../../assets/dominada.jpg'),
+  require('../../assets/fondos.jpg'),
+  require('../../assets/remo.jpg'),
+  require('../../assets/press-militar.png'),
+  require('../../assets/plancha.jpg'),
+  
+  
+];
 
 export default function RoutinesScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -48,6 +61,11 @@ export default function RoutinesScreen() {
   const [timeLeft, setTimeLeft] = useState(180);
   const [isActive, setIsActive] = useState(false);
   const [activeRoutineIndex, setActiveRoutineIndex] = useState<number | null>(null);
+
+  // Estado para mostrar el modal de ejercicios Full Body
+  const [showFullBodyModal, setShowFullBodyModal] = useState(false);
+  // Estado para el modal de información de ejercicio
+  const [infoVisible, setInfoVisible] = useState<number | null>(null);
 
   const weeklyStats = [
     { icon: 'fire', value: '2,450', label: 'Calorías quemadas', color: '#ffa500' },
@@ -81,6 +99,74 @@ export default function RoutinesScreen() {
       difficulty: "Difícil",
       icon: "run"
     }
+  ];
+
+  // Lista de ejercicios Full Body
+  const fullBodyExercises = [
+    {
+      name: 'Sentadillas',
+      sets: '4',
+      reps: '12',
+      rest: '90s',
+      icon: 'weight-lifter',
+      muscles: 'Piernas, Glúteos',
+    },
+    {
+      name: 'Press de Banca',
+      sets: '4',
+      reps: '10',
+      rest: '90s',
+      icon: 'dumbbell',
+      muscles: 'Pecho, Tríceps',
+    },
+    {
+      name: 'Peso Muerto',
+      sets: '3',
+      reps: '8',
+      rest: '120s',
+      icon: 'weight',
+      muscles: 'Espalda, Piernas',
+    },
+    {
+      name: 'Dominadas',
+      sets: '3',
+      reps: 'Max',
+      rest: '90s',
+      icon: 'arm-flex',
+      muscles: 'Espalda, Bíceps',
+    },
+    {
+      name: 'Fondos en paralelas',
+      sets: '3',
+      reps: '12',
+      rest: '90s',
+      icon: 'human-handsup',
+      muscles: 'Tríceps, Pecho',
+    },
+    {
+      name: 'Remo con barra',
+      sets: '4',
+      reps: '10',
+      rest: '90s',
+      icon: 'dumbbell', 
+      muscles: 'Espalda, Bíceps',
+    },
+    {
+      name: 'Press militar',
+      sets: '3',
+      reps: '10',
+      rest: '90s',
+      icon: 'arm-flex-outline',
+      muscles: 'Hombros, Tríceps',
+    },
+    {
+      name: 'Plancha',
+      sets: '3',
+      reps: '30s',
+      rest: '60s',
+      icon: 'run', 
+      muscles: 'Core',
+    },
   ];
 
   // Efecto para el contador
@@ -260,11 +346,10 @@ export default function RoutinesScreen() {
                     <Text style={styles.workoutTitle}>{plan.title}</Text>
                     <Text style={styles.workoutSubtitle}>{plan.subtitle}</Text>
                   </View>
-                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(plan.difficulty) }]}>
+                  <View style={[styles.difficultyBadge, { backgroundColor: getDifficultyColor(plan.difficulty) }]}> 
                     <Text style={styles.difficultyText}>{plan.difficulty}</Text>
                   </View>
                 </View>
-                
                 <View style={styles.workoutDetails}>
                   <View style={styles.workoutDetailItem}>
                     <Icon name="clock-outline" size={18} color="#666" />
@@ -275,7 +360,18 @@ export default function RoutinesScreen() {
                     <Text style={styles.workoutDetailText}>{plan.exercises}</Text>
                   </View>
                 </View>
-
+                {/* Botón para ver ejercicios solo en la rutina Full Body */}
+                {index === 0 && (
+                  <Button
+                    mode="outlined"
+                    style={{ marginTop: 8, borderColor: '#ffa500' }}
+                    labelStyle={{ color: '#ffa500', fontWeight: '700' }}
+                    icon={() => <Icon name="format-list-bulleted" size={16} color="#ffa500" />}
+                    onPress={() => setShowFullBodyModal(true)}
+                  >
+                    VER EJERCICIOS
+                  </Button>
+                )}
                 {(isActive || timeLeft < 180) && activeRoutineIndex === index && (
                   <View style={styles.timerInfo}>
                     <Icon name="clock-outline" size={18} color="#ffa500" />
@@ -285,7 +381,6 @@ export default function RoutinesScreen() {
                   </View>
                 )}
               </Card.Content>
-
               <Card.Actions style={styles.workoutCardActions}>
                 <Button
                   mode="contained"
@@ -308,6 +403,89 @@ export default function RoutinesScreen() {
             </Card>
           ))}
         </View>
+        {/* Modal ejercicios Full Body */}
+        <Portal>
+          <Modal
+            visible={showFullBodyModal}
+            onDismiss={() => setShowFullBodyModal(false)}
+            contentContainerStyle={{ margin: 21, backgroundColor: '#fff', borderRadius: 12, padding: 18, maxHeight: '100%', justifyContent: 'center' }}
+          >
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }} showsVerticalScrollIndicator={false}>
+              <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#1A1A1A', textAlign: 'center' }}>
+                Ejercicios Full Body
+              </Text>
+              {fullBodyExercises.map((exercise, idx) => (
+                <View key={idx} style={{ marginBottom: idx < fullBodyExercises.length - 1 ? 18 : 0 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <View style={{ width: 40, height: 40, backgroundColor: 'rgba(255,165,0,0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                      <Icon name={exercise.icon} size={22} color="#ffa500" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.name}</Text>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500' }}>{exercise.muscles}</Text>
+                    </View>
+                    <IconButton icon="information-outline" size={22} iconColor="#ffa500" style={{ marginLeft: 8, padding: 4 }} onPress={() => setInfoVisible(idx)} />
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 52 }}>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Series</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.sets}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Reps</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.reps}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Descanso</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.rest}</Text>
+                    </View>
+                  </View>
+                  {idx < fullBodyExercises.length - 1 && (
+                    <View style={{ height: 1, backgroundColor: '#E0E0E0', marginTop: 12, marginHorizontal: -16 }} />
+                  )}
+                </View>
+              ))}
+              <Button
+                mode="contained"
+                style={{ backgroundColor: '#ffa500', marginTop: 24 }}
+                labelStyle={{ color: '#000', fontWeight: '700' }}
+                icon={() => <Icon name="close" size={18} color="#000" />}
+                onPress={() => setShowFullBodyModal(false)}
+              >
+                CERRAR
+              </Button>
+            </ScrollView>
+          </Modal>
+
+          {/* Modal de información de ejercicio: solo visible si infoVisible !== null */}
+          <Modal
+            visible={infoVisible !== null}
+            onDismiss={() => setInfoVisible(null)}
+            dismissable={true}
+            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', minHeight: '100%', backgroundColor: 'transparent', padding: 0 }}
+          >
+            <TouchableWithoutFeedback onPress={() => setInfoVisible(null)}>
+              <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableWithoutFeedback onPress={() => {}}>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', maxWidth: 320, maxHeight: 380, width: '90%', justifyContent: 'center', elevation: 8, overflow: 'hidden' }}>
+                    <TouchableOpacity style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} onPress={() => setInfoVisible(null)}>
+                      <Icon name="close" size={28} color="#ffa500" />
+                    </TouchableOpacity>
+                    {infoVisible !== null && (
+                      <View style={{ width: 260, height: 260, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                        <Image
+                          source={exerciseImages[infoVisible]}
+                          style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )}
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </Portal>
 
         {/* Herramientas */}
         <View style={styles.section}>
@@ -518,7 +696,7 @@ export default function RoutinesScreen() {
                     style={styles.inputField}
                     activeOutlineColor="#ffa500"
                     textColor="#1A1A1A"
-                    left={<TextInput.Icon icon="weight" iconColor="#ffa500" />}
+                    left={<TextInput.Icon icon="weight" color="#ffa500" />}
                   />
 
                   <TextInput
@@ -530,7 +708,7 @@ export default function RoutinesScreen() {
                     style={styles.inputField}
                     activeOutlineColor="#ffa500"
                     textColor="#1A1A1A"
-                    left={<TextInput.Icon icon="human-male-height" iconColor="#ffa500" />}
+                    left={<TextInput.Icon icon="human-male-height" color="#ffa500" />}
                   />
 
                   {imc && (
@@ -616,7 +794,7 @@ export default function RoutinesScreen() {
           size={28}
           iconColor="rgba(255, 255, 255, 0.7)"
           style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ProgressScreen')}
+          onPress={() => {}}
         />
         <IconButton
           icon="dumbbell"
