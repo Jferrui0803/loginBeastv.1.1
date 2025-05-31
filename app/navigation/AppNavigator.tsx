@@ -21,10 +21,10 @@ import NewChatScreen from '../src/screens/NewChatScreen';
 import IAChatListScreen from '../src/screens/IAChatListScreen';
 import IAChatDetailScreen from '../src/screens/IAChatDetailScreen';
 import EditProfileScreen from '../src/screens/EditProfileScreen';
+import QRGeneratorScreen from '../src/screens/QRGeneratorScreen';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import type { User } from "../src/screens/ProfileScreen";
 import { IconButton } from 'react-native-paper';
 
 // Definir los parámetros de navegación del stack principal
@@ -42,9 +42,10 @@ type MainStackParamList = {
   Profile: undefined;
   Routines: undefined;
   WorkoutDetail: undefined;
+  QRGenerator: undefined;
   IAChatList: { chatType: 'nutrition' | 'training' };
   IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
-  EditProfile: { user: User }
+  EditProfile: { user: { id: string; name: string; email: string; phone: string } };
 };
 
 export type { MainStackParamList };
@@ -230,11 +231,27 @@ const AppNavigator = () => {
                   fontSize: 20,
                   color: '#fff',
                 },
-                headerTintColor: '#fff',
-              }}
+                headerTintColor: '#fff',              }}
             />
             <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen
+              name="QRGenerator"
+              component={QRGeneratorScreen}
+              options={{
+                headerShown: true,
+                title: 'Código QR',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }}
+            />
             {/* IA Chat Screens */}
             <Stack.Screen
               name="IAChatList"
