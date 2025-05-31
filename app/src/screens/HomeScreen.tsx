@@ -155,7 +155,8 @@ export default function HomeScreen() {
                     icon={() => <Icon name="calendar" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    onPress={() => navigation.navigate('ClassBooking')}>
+                    // onPress={() => navigation.navigate('ClassBooking')}
+                >
                     Clases
                 </Button>
                 <Button
@@ -163,7 +164,8 @@ export default function HomeScreen() {
                     icon={() => <Icon name="chart-line" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    onPress={() => navigation.navigate('ProgressScreen')}>
+                    // onPress={() => navigation.navigate('ProgressScreen')}
+                >
                     Progreso
                 </Button>
                 <Button
@@ -171,7 +173,8 @@ export default function HomeScreen() {
                     icon={() => <Icon name="dumbbell" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    onPress={() => navigation.navigate('Routines')}>
+                    // onPress={() => navigation.navigate('Routines')}
+                >
                     Rutinas
                 </Button>
             </View>
@@ -290,7 +293,8 @@ export default function HomeScreen() {
                 onPress={() => navigation.navigate('ChatList')}
             />
 
-            <View style={styles.bottomBar}>
+            {/* Eliminar barra inferior personalizada, ya no es necesaria con tabs reales */}
+            {/* <View style={styles.bottomBar}>
                 <IconButton
                     icon="home"
                     size={28}
@@ -319,7 +323,7 @@ export default function HomeScreen() {
                     style={styles.bottomBarButton}
                     onPress={() => navigation.navigate('Routines')}
                 />
-            </View>
+            </View> */}
         </View>
     );
 }
@@ -564,24 +568,5 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
-    },
-
-    // Bottom Bar
-    bottomBar: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 0,
-        height: 70,
-        backgroundColor: '#1A1A1A',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        paddingHorizontal: 20,
-        borderTopWidth: 1,
-        borderTopColor: 'black',
-    },
-    bottomBarButton: {
-        margin: 0,
     },
 });
