@@ -8,6 +8,7 @@ import type { NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeClassCard from '../components/HomeClassCard';
 
@@ -188,16 +189,16 @@ export default function HomeScreen() {
                     icon={() => <Icon name="food-apple" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    onPress={() => navigation.navigate('Nutrition')}>
-                    Nutrición
+                    onPress={() => handleNewIAChat('nutrition')}>
+                    Chat Nutrición
                 </Button>
                 <Button
                     mode="outlined"
                     icon={() => <Icon name="robot" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    onPress={() => navigation.navigate('PersonalizedTraining')}>
-                    Entrenador IA
+                    onPress={() => handleNewIAChat('training')}>
+                    Chat Entrenamiento
                 </Button>
             </View>
         </View>
@@ -237,6 +238,27 @@ export default function HomeScreen() {
             </Card.Content>
         </Card>
     );
+
+    // --- ACCIONES RÁPIDAS IA CHAT ---
+    const handleNewIAChat = async (chatType: 'nutrition' | 'training') => {
+        const getStorageKey = (type: 'nutrition' | 'training') =>
+            type === 'nutrition' ? 'iaChats_nutrition' : 'iaChats_training';
+        const storageKey = getStorageKey(chatType);
+        const chatsRaw = await AsyncStorage.getItem(storageKey);
+        const chats = chatsRaw ? JSON.parse(chatsRaw) : [];
+        const newChat = {
+            id: Date.now().toString(),
+            title: chatType === 'nutrition' ? 'Nuevo Chat Nutrición' : 'Nuevo Chat Entrenamiento',
+            messages: [],
+        };
+        const updatedChats = [newChat, ...chats];
+        await AsyncStorage.setItem(storageKey, JSON.stringify(updatedChats));
+        navigation.navigate('IAChatDetail', {
+            chatId: newChat.id,
+            chatTitle: newChat.title,
+            chatType,
+        });
+    };
 
     return (
         <View style={styles.container}>
