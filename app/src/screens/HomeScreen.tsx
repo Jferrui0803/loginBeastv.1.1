@@ -27,6 +27,7 @@ type RootStackParamList = {
     Nutrition: undefined;
     ChatList: undefined;
     Chat: { chatId: string; chatName?: string };
+    QRGenerator: undefined;
     IAChatList: { chatType: 'nutrition' | 'training' };
     IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
 };
@@ -144,9 +145,7 @@ export default function HomeScreen() {
                 </Button>
             </Card.Actions>
         </Card>
-    );
-
-    const renderQuickActions = () => (
+    );    const renderQuickActions = () => (
         <View style={styles.quickActionsContainer}>
             <Text style={styles.sectionTitle}>Acciones rápidas</Text>
             <View style={styles.quickActionsGrid}>
@@ -173,6 +172,32 @@ export default function HomeScreen() {
                     labelStyle={styles.quickActionLabel}
                     onPress={() => navigation.navigate('Routines')}>
                     Rutinas
+                </Button>
+            </View>
+            <View style={styles.quickActionsGrid}>
+                <Button
+                    mode="outlined"
+                    icon={() => <Icon name="qrcode" size={24} color="#ffa500" />}
+                    style={styles.quickActionButton}
+                    labelStyle={styles.quickActionLabel}
+                    onPress={() => navigation.navigate('QRGenerator')}>
+                    Acceso QR
+                </Button>
+                <Button
+                    mode="outlined"
+                    icon={() => <Icon name="food-apple" size={24} color="#ffa500" />}
+                    style={styles.quickActionButton}
+                    labelStyle={styles.quickActionLabel}
+                    onPress={() => navigation.navigate('Nutrition')}>
+                    Nutrición
+                </Button>
+                <Button
+                    mode="outlined"
+                    icon={() => <Icon name="robot" size={24} color="#ffa500" />}
+                    style={styles.quickActionButton}
+                    labelStyle={styles.quickActionLabel}
+                    onPress={() => navigation.navigate('PersonalizedTraining')}>
+                    Entrenador IA
                 </Button>
             </View>
         </View>
