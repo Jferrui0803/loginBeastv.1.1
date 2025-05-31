@@ -175,7 +175,7 @@ export default function HomeScreen() {
                     Rutinas
                 </Button>
             </View>
-            <View style={styles.quickActionsGrid}>
+            <View style={[styles.quickActionsGrid, { marginTop: 16 }]}>
                 <Button
                     mode="outlined"
                     icon={() => <Icon name="qrcode" size={24} color="#ffa500" />}

@@ -288,6 +288,17 @@ export default function RoutinesScreen() {
     setActiveRoutineIndex(null);
   };
 
+  const cancelarRutina = () => {
+    Alert.alert(
+      '¿Estás seguro que quieres cancelar tu rutina actual?',
+      '',
+      [
+        { text: 'No', style: 'cancel' },
+        { text: 'Sí', style: 'destructive', onPress: resetTimer }
+      ]
+    );
+  };
+
   const cerrarTimer = () => {
     setShowTimer(false);
   };
@@ -459,6 +470,9 @@ export default function RoutinesScreen() {
                     <Text style={styles.timerInfoText}>
                       Tiempo restante: {formatTime(timeLeft)}
                     </Text>
+                    <TouchableOpacity onPress={() => setShowTimer(true)} style={{ marginLeft: 55 }}>
+                      <Text style={{ color: '#ffa500', fontWeight: '700', textDecorationLine: 'underline' }}>Detalles</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
               </Card.Content>
@@ -480,6 +494,18 @@ export default function RoutinesScreen() {
                    activeRoutineIndex === index && timeLeft < 180 ? 'CONTINUAR' : 
                    'INICIAR RUTINA'}
                 </Button>
+                {/* Mostrar botón CANCELAR solo si la rutina está activa o pausada */}
+                {(activeRoutineIndex === index && (isActive || timeLeft < 180)) && (
+                  <Button
+                    mode="contained"
+                    onPress={cancelarRutina}
+                    style={[styles.startButton, { backgroundColor: '#F44336', marginLeft: 8 }]}
+                    labelStyle={[{ color: '#fff', fontWeight: '700' }]}
+                    icon={() => <Icon name="close" size={16} color="#fff" />}
+                  >
+                    CANCELAR
+                  </Button>
+                )}
               </Card.Actions>
             </Card>
           ))}
@@ -905,6 +931,17 @@ export default function RoutinesScreen() {
               >
                 {isActive ? 'PAUSAR' : 'CONTINUAR'}
               </Button>
+              {(isActive || (!isActive && timeLeft < 180)) && (
+                <Button
+                  mode="outlined"
+                  onPress={cancelarRutina}
+                  style={[styles.timerActionButton, { borderColor: '#F44336', marginLeft: 8 }]}
+                  labelStyle={[{ color: '#F44336', fontWeight: '700' }]}
+                  icon={() => <Icon name="close" size={16} color="#F44336" />}
+                >
+                  CANCELAR
+                </Button>
+              )}
             </Card.Actions>
           </Card>
         </Modal>
