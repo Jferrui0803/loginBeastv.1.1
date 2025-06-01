@@ -47,17 +47,21 @@ export default function QRGeneratorScreen() {
   // Calcular tiempo restante
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     if (qrData?.expires_at) {
       interval = setInterval(() => {
         const now = new Date().getTime();
         const expiry = new Date(qrData.expires_at).getTime();
-        const difference = expiry - now;
-
-        if (difference > 0) {
+        const difference = expiry - now; if (difference > 0) {
+          const hours = Math.floor(difference / (1000 * 60 * 60));
           const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+          if (hours > 0) {
+            setTimeRemaining(`${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+          } else {
+            setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+          }
         } else {
           setTimeRemaining('Expirado');
           setQrData(null);
@@ -72,7 +76,7 @@ export default function QRGeneratorScreen() {
   const generateQR = async () => {
     setLoading(true);
     setError(null);
-      try {
+    try {
       const token = await SecureStore.getItemAsync('userToken');
       if (!token) {
         throw new Error('Token de autenticación no encontrado');
@@ -81,7 +85,7 @@ export default function QRGeneratorScreen() {
       // Decodificar el token para obtener el gymId
       const decoded = jwtDecode<JwtPayload>(token);
       const userGymId = decoded.gymId;
-      
+
       if (!userGymId) {
         throw new Error('gymId no encontrado en el token');
       }
@@ -92,7 +96,7 @@ export default function QRGeneratorScreen() {
       console.log('Token de autenticación:', token);
       const response = await axios.post(
         `${QR_SERVICE_URL}/generate-qr`,
-        
+
         { gymId: userGymId },
         {
           headers: {
@@ -106,7 +110,7 @@ export default function QRGeneratorScreen() {
     } catch (err: any) {
       console.error('Error generando QR:', err);
       let errorMessage = 'Error al generar el código QR';
-      
+
       if (err.response?.data?.detail) {
         errorMessage = err.response.data.detail;
       } else if (err.response?.data?.message) {
@@ -114,7 +118,7 @@ export default function QRGeneratorScreen() {
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
       Alert.alert('Error', errorMessage);
     } finally {
@@ -132,7 +136,7 @@ export default function QRGeneratorScreen() {
             <Text style={styles.qrTitle}>Tu código QR</Text>
             <Icon name="qrcode" size={24} color="#ffa500" />
           </View>
-            <View style={styles.qrContainer}>
+          <View style={styles.qrContainer}>
             {qrData.qr_code ? (
               <QRCode
                 value={qrData.qr_token}
@@ -144,7 +148,7 @@ export default function QRGeneratorScreen() {
               <ActivityIndicator size="large" color="#ffa500" />
             )}
           </View>
-          
+
           <View style={styles.qrInfo}>
             <View style={styles.infoItem}>
               <Icon name="clock-outline" size={20} color="#ffa500" />
@@ -152,20 +156,19 @@ export default function QRGeneratorScreen() {
                 Tiempo restante: <Text style={styles.timeText}>{timeRemaining}</Text>
               </Text>
             </View>
-            
+
             <View style={styles.infoItem}>
               <Icon name="shield-check" size={20} color="#4CAF50" />
               <Text style={styles.infoText}>Código de un solo uso</Text>
             </View>
           </View>
-            <Divider style={styles.divider} />
-          
-          <Text style={styles.instructionsTitle}>Instrucciones:</Text>
-          <Text style={styles.instructionsText}>
-            1. Presenta este código QR en la entrada del gimnasio
-            2. El personal escaneará el código para validar tu acceso
-            3. El código expira en 15 minutos y es de un solo uso
-            4. Genera un nuevo código si necesitas acceder nuevamente
+          <Divider style={styles.divider} />
+
+          <Text style={styles.instructionsTitle}>Instrucciones:</Text>          <Text style={styles.instructionsText}>
+            {'1. Presenta este código QR en la entrada del gimnasio\n'}
+            {'2. El personal escaneará el código para validar tu acceso\n'}
+            {'3. El código expira en 2 horas y es de un solo uso\n'}
+            {'4. Genera un nuevo código si necesitas acceder nuevamente'}
           </Text>
         </Card.Content>
       </Card>
@@ -179,11 +182,11 @@ export default function QRGeneratorScreen() {
           <Text style={styles.generateTitle}>Acceso al gimnasio</Text>
           <Icon name="dumbbell" size={24} color="#ffa500" />
         </View>
-          <Text style={styles.generateDescription}>
-          Genera un código QR para acceder al gimnasio. El código es válido por 15 minutos 
+        <Text style={styles.generateDescription}>
+          Genera un código QR para acceder al gimnasio. El código es válido por 2 horas
           y solo puede ser usado una vez.
         </Text>
-          <Button
+        <Button
           mode="contained"
           style={styles.generateButton}
           labelStyle={styles.generateButtonText}
@@ -194,7 +197,7 @@ export default function QRGeneratorScreen() {
         >
           {loading ? 'Generando...' : 'GENERAR CÓDIGO QR'}
         </Button>
-        
+
         {error && (
           <View style={styles.errorContainer}>
             <Icon name="alert-circle" size={20} color="#F44336" />
@@ -207,8 +210,8 @@ export default function QRGeneratorScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
