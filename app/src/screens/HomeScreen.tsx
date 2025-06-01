@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image, RefreshControl, ActivityIndicator, Dimensions } from 'react-native';
 import { Text, Card, Button, Surface, FAB, Chip, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { jwtDecode } from 'jwt-decode';
 
 import HomeClassCard from '../components/HomeClassCard';
 
@@ -39,7 +40,36 @@ export default function HomeScreen() {
     const navigation = useNavigation<NavigationProp>();
     const [refreshing, setRefreshing] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
+    const [userRole, setUserRole] = useState<'USER' | 'ADMIN' | 'TRAINER' | null>(null);
 
+    const getUserRole = async () => {
+        try {
+            const token = await SecureStore.getItemAsync('userToken');
+
+            if (token) {
+                // Primero intentar obtener el rol del token JWT
+                try {
+                    const decoded = jwtDecode<JwtPayload>(token);
+                    if (decoded.role) {
+                        setUserRole(decoded.role);
+
+                        return;
+                    }
+                } catch (jwtError) {
+                    console.log('Error decoding JWT, fetching from API:', jwtError);
+                }
+
+            }
+        } catch (error) {
+            console.error('Error getting user role:', error);
+            setUserRole('USER'); // Default a user si hay error
+        }
+    };
+
+    // Cargar el rol al montar el componente
+    useEffect(() => {
+        getUserRole();
+    }, []);
     const onRefresh = async () => {
         setRefreshing(true);
         try {
@@ -106,8 +136,8 @@ export default function HomeScreen() {
     const renderWorkoutCard = () => (
         <Card style={styles.workoutCard}>
             <View style={styles.cardImageContainer}>
-                <Card.Cover 
-                    source={require('../../assets/workout.webp')} 
+                <Card.Cover
+                    source={require('../../assets/workout.webp')}
                     style={styles.cardImage}
                 />
                 <View style={styles.cardOverlay}>
@@ -119,7 +149,7 @@ export default function HomeScreen() {
             <Card.Content style={styles.workoutCardContent}>
                 <Text style={styles.workoutTitle}>Entrenamiento del día</Text>
                 <Text style={styles.workoutSubtitle}>Full Body • Fuerza y resistencia</Text>
-                
+
                 <View style={styles.workoutStats}>
                     <View style={styles.statItem}>
                         <Icon name="clock-outline" size={18} color="#666" />
@@ -136,7 +166,7 @@ export default function HomeScreen() {
                 </View>
             </Card.Content>
             <Card.Actions style={styles.workoutCardActions}>
-                <Button 
+                <Button
                     mode="contained"
                     style={styles.startButton}
                     labelStyle={styles.startButtonText}
@@ -146,7 +176,7 @@ export default function HomeScreen() {
                 </Button>
             </Card.Actions>
         </Card>
-    );    const renderQuickActions = () => (
+    ); const renderQuickActions = () => (
         <View style={styles.quickActionsContainer}>
             <Text style={styles.sectionTitle}>Acciones rápidas</Text>
             <View style={styles.quickActionsGrid}>
@@ -155,7 +185,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="calendar" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    // onPress={() => navigation.navigate('ClassBooking')}
+                // onPress={() => navigation.navigate('ClassBooking')}
                 >
                     Clases
                 </Button>
@@ -164,7 +194,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="chart-line" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    // onPress={() => navigation.navigate('ProgressScreen')}
+                // onPress={() => navigation.navigate('ProgressScreen')}
                 >
                     Progreso
                 </Button>
@@ -173,7 +203,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="dumbbell" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                    // onPress={() => navigation.navigate('Routines')}
+                // onPress={() => navigation.navigate('Routines')}
                 >
                     Rutinas
                 </Button>
@@ -207,7 +237,16 @@ export default function HomeScreen() {
         </View>
     );
 
-
+    const renderQrScannerButton = () => (
+        <Button
+            mode="outlined"
+            icon={() => <Icon name="qrcode-scan" size={24} color="#ffa500" />}
+            style={styles.scannerButton}
+            labelStyle={styles.quickActionLabel}
+            onPress={() => navigation.navigate('ScannerScreen')}>
+            Escanear QR
+        </Button>
+    );
     const renderWeeklyStats = () => (
         <Card style={styles.statsCard}>
             <Card.Content style={styles.statsContent}>
@@ -242,7 +281,6 @@ export default function HomeScreen() {
         </Card>
     );
 
-    // --- ACCIONES RÁPIDAS IA CHAT ---
     const handleNewIAChat = async (chatType: 'nutrition' | 'training') => {
         const getStorageKey = (type: 'nutrition' | 'training') =>
             type === 'nutrition' ? 'iaChats_nutrition' : 'iaChats_training';
@@ -281,11 +319,12 @@ export default function HomeScreen() {
             >
                 {renderHeroSection()}
                 {renderWorkoutCard()}
+                {userRole !== 'USER' ? (renderQrScannerButton()) : null}
                 {renderQuickActions()}
                 {renderWeeklyStats()}
                 <HomeClassCard reloadTrigger={reloadKey} />
             </ScrollView>
-            
+
             <FAB
                 icon="message"
                 style={styles.fab}
@@ -293,37 +332,6 @@ export default function HomeScreen() {
                 onPress={() => navigation.navigate('ChatList')}
             />
 
-            {/* Eliminar barra inferior personalizada, ya no es necesaria con tabs reales */}
-            {/* <View style={styles.bottomBar}>
-                <IconButton
-                    icon="home"
-                    size={28}
-                    iconColor="#FFFFFF"
-                    style={styles.bottomBarButton}
-                    onPress={() => navigation.navigate('HomeScreen')}
-                />
-                <IconButton
-                    icon="calendar"
-                    size={28}
-                    iconColor="rgba(255, 255, 255, 0.7)"
-                    style={styles.bottomBarButton}
-                    onPress={() => navigation.navigate('ClassBooking')}
-                />
-                <IconButton
-                    icon="chart-line"
-                    size={28}
-                    iconColor="rgba(255, 255, 255, 0.7)"
-                    style={styles.bottomBarButton}
-                    onPress={() => navigation.navigate('ProgressScreen')}
-                />
-                <IconButton
-                    icon="dumbbell"
-                    size={28}
-                    iconColor="rgba(255, 255, 255, 0.7)"
-                    style={styles.bottomBarButton}
-                    onPress={() => navigation.navigate('Routines')}
-                />
-            </View> */}
         </View>
     );
 }
@@ -331,7 +339,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5dc', 
+        backgroundColor: '#f5f5dc',
     },
     scrollContent: {
         paddingBottom: 100,
@@ -349,7 +357,7 @@ const styles = StyleSheet.create({
         paddingVertical: 24,
         backgroundColor: '#FFFFFF',
         marginBottom: 16,
-        borderRadius:0,
+        borderRadius: 0,
     },
     heroContent: {
         flex: 1,
@@ -368,7 +376,7 @@ const styles = StyleSheet.create({
     heroIcon: {
         width: 60,
         height: 60,
-        backgroundColor: 'rgba(255, 165, 0, 0.1)', 
+        backgroundColor: 'rgba(255, 165, 0, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -378,7 +386,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginBottom: 24,
         backgroundColor: '#FFFFFF',
-        borderRadius:0,
+        borderRadius: 0,
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -388,11 +396,11 @@ const styles = StyleSheet.create({
     cardImageContainer: {
         position: 'relative',
         overflow: 'hidden',
-        
+
     },
     cardImage: {
         height: 200,
-        borderRadius:0,
+        borderRadius: 0,
     },
     cardOverlay: {
         position: 'absolute',
@@ -400,12 +408,12 @@ const styles = StyleSheet.create({
         right: 16,
     },
     difficultyBadge: {
-        backgroundColor: 'rgba(255, 165, 0, 0.95)', 
+        backgroundColor: 'rgba(255, 165, 0, 0.95)',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 8,
-        elevation: 4, 
-        shadowColor: '#000', 
+        elevation: 4,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.3,
         shadowRadius: 4,
@@ -421,7 +429,7 @@ const styles = StyleSheet.create({
     },
     workoutCardContent: {
         padding: 20,
-    
+
     },
     workoutTitle: {
         fontSize: 20,
@@ -437,7 +445,7 @@ const styles = StyleSheet.create({
         color: '#666666',
         marginBottom: 16,
         textAlign: 'center',
-        
+
     },
     workoutStats: {
         flexDirection: 'row',
@@ -457,22 +465,22 @@ const styles = StyleSheet.create({
     workoutCardActions: {
         paddingHorizontal: 20,
         paddingBottom: 20,
-        justifyContent: 'center', 
+        justifyContent: 'center',
     },
     startButton: {
-        backgroundColor: '#ffa500', 
+        backgroundColor: '#ffa500',
         paddingVertical: 2,
-        paddingHorizontal: 16, 
-        borderRadius:0,
+        paddingHorizontal: 16,
+        borderRadius: 0,
         elevation: 0,
-        minWidth: 120, 
-        alignSelf: 'flex-start', 
+        minWidth: 120,
+        alignSelf: 'flex-start',
     },
     startButtonText: {
-        fontSize: 14, 
+        fontSize: 14,
         fontWeight: '700',
         letterSpacing: 0.5,
-        color: '#000000', 
+        color: '#000000',
     },
 
     // Quick Actions
@@ -493,7 +501,7 @@ const styles = StyleSheet.create({
     },
     quickActionButton: {
         flex: 1,
-        borderColor: '#ffa500', 
+        borderColor: '#ffa500',
         paddingVertical: 8,
         backgroundColor: '#FFFFFF',
     },
@@ -509,7 +517,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         backgroundColor: '#FFFFFF',
         elevation: 2,
-        borderRadius:0,
+        borderRadius: 0,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
@@ -540,7 +548,7 @@ const styles = StyleSheet.create({
     statIconContainer: {
         width: 40,
         height: 40,
-        backgroundColor: 'rgba(255, 165, 0, 0.1)', 
+        backgroundColor: 'rgba(255, 165, 0, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 8,
@@ -561,12 +569,19 @@ const styles = StyleSheet.create({
     fab: {
         position: 'absolute',
         right: 20,
-        bottom: 100,
+        bottom: 10,
         backgroundColor: '#ffa500',
         elevation: 8,
         shadowColor: '#ffa500',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 8,
+    },
+        scannerButton: {
+        marginHorizontal: 20,
+        marginBottom: 16,
+        borderColor: '#ffa500',
+        borderWidth: 1,
+        backgroundColor: '#FFFFFF',
     },
 });
