@@ -118,7 +118,7 @@ export default function QRGeneratorScreen() {
       }
 
       // URL del servicio QR de Python
-      const QR_SERVICE_URL = 'http://192.168.1.33:8000'; // Servicio QR corriendo en Docker
+      const QR_SERVICE_URL = 'http://192.168.1.78:8000'; // Servicio QR corriendo en Docker
       console.log('Generando QR para el gimnasio:', userGymId);
       console.log('Token de autenticación:', token);
       const response = await axios.post(
@@ -192,7 +192,8 @@ export default function QRGeneratorScreen() {
           </View>
           <Divider style={styles.divider} />
 
-          <Text style={styles.instructionsTitle}>Instrucciones:</Text>          <Text style={styles.instructionsText}>
+          <Text style={styles.instructionsTitle}>Instrucciones:</Text>
+          <Text style={styles.instructionsText}>
             {'1. Presenta este código QR en la entrada del gimnasio\n'}
             {'2. El personal escaneará el código para validar tu acceso\n'}
             {'3. El código expira en 2 horas y es de un solo uso\n'}
