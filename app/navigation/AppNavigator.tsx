@@ -27,6 +27,9 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { IconButton } from 'react-native-paper';
 import MainTabNavigator from './MainTabNavigator';
+import ChooseOptionScreen from '../src/screens/ChooseOptionScreen';
+import ScannerScreen from '../src/screens/ScannerScreen';
+import ChangePasswordScreen from '../src/screens/ChangePasswordScreen';
 
 // Definir los parámetros de navegación del stack principal
 type MainStackParamList = {
@@ -48,6 +51,9 @@ type MainStackParamList = {
   IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
   EditProfile: { user: { id: string; name: string; email: string; phone: string } };
   MainTabs: undefined;
+  ChooseOptionScreen: undefined;
+  ScannerScreen: undefined;
+  ChangePasswordScreen:  { user: { id: string; name: string; email: string; phone: string } };
 };
 
 export type { MainStackParamList };
@@ -79,17 +85,42 @@ const AppNavigator = () => {
         {authState?.authenticated ? (
           <>
             <Stack.Screen
+              name="ChooseOptionScreen"
+              component={ChooseOptionScreen}>
+            </Stack.Screen>
+            <Stack.Screen
+              name="ScannerScreen"
+              component={ScannerScreen} >
+            </Stack.Screen>
+            <Stack.Screen
               name="MainTabs"
               component={MainTabNavigator}
               options={{ headerShown: false }}
             />
             {/* Pantallas secundarias fuera de tabs */}
             <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen 
-              name="ChatList" 
-              component={ChatListScreen} 
-              options={{ 
-                headerShown: true, 
+            <Stack.Screen
+              name="ChangePasswordScreen"
+              component={ChangePasswordScreen}
+              options={{
+                headerShown: true,
+                title: 'Cambiar Contraseña',
+                headerStyle: {
+                  backgroundColor: '#1A1A1A',
+                },
+                headerTitleStyle: {
+                  fontWeight: '700',
+                  fontSize: 20,
+                  color: '#fff',
+                },
+                headerTintColor: '#fff',
+              }}
+            />
+            <Stack.Screen
+              name="ChatList"
+              component={ChatListScreen}
+              options={{
+                headerShown: true,
                 title: 'Chats',
                 headerStyle: {
                   backgroundColor: '#1A1A1A',
@@ -100,13 +131,13 @@ const AppNavigator = () => {
                   color: '#fff',
                 },
                 headerTintColor: '#fff',
-              }} 
+              }}
             />
-            <Stack.Screen 
-              name="NewChat" 
-              component={NewChatScreen} 
-              options={{ 
-                headerShown: true, 
+            <Stack.Screen
+              name="NewChat"
+              component={NewChatScreen}
+              options={{
+                headerShown: true,
                 title: 'Nuevo Chat',
                 headerStyle: {
                   backgroundColor: '#1A1A1A',
@@ -117,7 +148,7 @@ const AppNavigator = () => {
                   color: '#fff',
                 },
                 headerTintColor: '#fff',
-              }} 
+              }}
             />
             <Stack.Screen
               name="Chat"
@@ -136,11 +167,11 @@ const AppNavigator = () => {
                 headerTintColor: '#fff',
               })}
             />
-            <Stack.Screen 
-              name="Nutrition" 
-              component={NutritionScreen} 
-              options={{ 
-                headerShown: true, 
+            <Stack.Screen
+              name="Nutrition"
+              component={NutritionScreen}
+              options={{
+                headerShown: true,
                 title: 'Nutrición',
                 headerStyle: {
                   backgroundColor: '#1A1A1A',
@@ -151,13 +182,13 @@ const AppNavigator = () => {
                   color: '#fff',
                 },
                 headerTintColor: '#fff',
-              }} 
+              }}
             />
-            <Stack.Screen 
-              name="PersonalizedTraining" 
-              component={PersonalizedTrainingScreen} 
-              options={{ 
-                headerShown: true, 
+            <Stack.Screen
+              name="PersonalizedTraining"
+              component={PersonalizedTrainingScreen}
+              options={{
+                headerShown: true,
                 title: 'Entrenamiento Personalizado',
                 headerStyle: {
                   backgroundColor: '#1A1A1A',
@@ -168,7 +199,7 @@ const AppNavigator = () => {
                   color: '#fff',
                 },
                 headerTintColor: '#fff',
-              }} 
+              }}
             />
             <Stack.Screen
               name="ClassBooking"
@@ -218,7 +249,8 @@ const AppNavigator = () => {
                   fontSize: 20,
                   color: '#fff',
                 },
-                headerTintColor: '#fff',              }}
+                headerTintColor: '#fff',
+              }}
             />
             <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
@@ -257,11 +289,11 @@ const AppNavigator = () => {
                 headerTintColor: '#fff',
               })}
             />
-            <Stack.Screen 
-              name="IAChatDetail" 
-              component={IAChatDetailScreen} 
-              options={({ route }) => ({ 
-                headerShown: true, 
+            <Stack.Screen
+              name="IAChatDetail"
+              component={IAChatDetailScreen}
+              options={({ route }) => ({
+                headerShown: true,
                 title: route.params.chatTitle,
                 headerStyle: {
                   backgroundColor: '#1A1A1A',
@@ -272,12 +304,12 @@ const AppNavigator = () => {
                   color: '#fff',
                 },
                 headerTintColor: '#fff',
-              })} 
+              })}
             />
           </>
         ) : (
           <Stack.Screen name="Login" component={Login}
-          options={{ headerShown: false }} />
+            options={{ headerShown: false }} />
         )}
       </Stack.Navigator>
     </NavigationContainer>
