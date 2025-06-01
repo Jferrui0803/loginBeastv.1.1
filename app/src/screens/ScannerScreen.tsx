@@ -13,16 +13,18 @@ const ScannerScreen = () => {
 
     const handleBarcodeScanned = (data: any) => {
         console.log('Código escaneado:', data);
- 
-        if (data) {
+        if (navigation.canGoBack()) {
             navigation.goBack();
+        } else {
+            navigation.navigate('MainTabs'); // Redirige al tab principal si no hay pantalla previa
         }
     };
+
     return (
         <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <CameraView
                 style={{ flex: 1, width: '100%' }}
-                facing= "back"
+                facing="back"
                 onBarcodeScanned={handleBarcodeScanned}
             />
         </SafeAreaView>
