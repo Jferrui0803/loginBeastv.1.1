@@ -14,6 +14,7 @@ import { API_URL, useAuth } from '../../context/AuthContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import QRCode from 'react-native-qrcode-svg';
 import { jwtDecode } from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -52,6 +53,7 @@ export default function QRGeneratorScreen() {
       interval = setInterval(() => {
         const now = new Date().getTime();
         const expiry = new Date(qrData.expires_at).getTime();
+<<<<<<< HEAD
         const difference = expiry - now; if (difference > 0) {
           const hours = Math.floor(difference / (1000 * 60 * 60));
           const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -127,7 +129,7 @@ export default function QRGeneratorScreen() {
       }
 
       // URL del servicio QR de Python
-      const QR_SERVICE_URL = 'http://192.168.1.144:8000'; // Servicio QR corriendo en Docker
+      const QR_SERVICE_URL = 'http://192.168.1.78:8000'; // Servicio QR corriendo en Docker
       console.log('Generando QR para el gimnasio:', userGymId);
       console.log('Token de autenticación:', token);
       const response = await axios.post(
