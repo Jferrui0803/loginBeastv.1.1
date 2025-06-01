@@ -189,7 +189,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="calendar" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                // onPress={() => navigation.navigate('ClassBooking')}
+                    onPress={() => navigation.navigate('ClassBooking')}
                 >
                     
                     <Text>Clases</Text>
@@ -199,7 +199,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="chart-line" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                // onPress={() => navigation.navigate('ProgressScreen')}
+                    onPress={() => navigation.navigate('ProgressScreen')}
                 >
                     
                     <Text>Progreso</Text>
@@ -209,7 +209,7 @@ export default function HomeScreen() {
                     icon={() => <Icon name="dumbbell" size={24} color="#ffa500" />}
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
-                // onPress={() => navigation.navigate('Routines')}
+                    onPress={() => navigation.navigate('Routines')}
                 >
                     
                     <Text>Rutinas</Text>
@@ -257,7 +257,7 @@ export default function HomeScreen() {
                 const permission = await requestCameraPermission();
 
                 if (permission.granted) {
-                    navigation.navigate('ScannerScreen'); // <-- asegúrate que exista
+                    navigation.navigate('ScannerScreen'); 
                 } else {
                     alert('Permiso de cámara denegado. No puedes escanear el código QR.');
                 }
