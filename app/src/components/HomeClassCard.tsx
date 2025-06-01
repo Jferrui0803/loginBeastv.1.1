@@ -10,6 +10,7 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../../context/AuthContext';
 import { jwtDecode } from 'jwt-decode';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface Clase {
   id: string;
@@ -76,6 +77,22 @@ const ClassesSection: React.FC<{ reloadTrigger?: number }> = ({ reloadTrigger })
     fetchClases();
   }, [reloadTrigger]);
 
+  // Función para mapear el nombre de la clase a un icono relevante
+  const getClassIcon = (className: string) => {
+    const lower = className.toLowerCase();
+    if (lower.includes('yoga')) return 'yoga';
+    if (lower.includes('spinning') || lower.includes('ciclismo')) return 'bike';
+    if (lower.includes('pilates')) return 'human-handsup';
+    if (lower.includes('zumba') || lower.includes('baile')) return 'music-note';
+    if (lower.includes('fuerza') || lower.includes('pesas') || lower.includes('musculación')) return 'dumbbell';
+    if (lower.includes('cardio')) return 'heart-pulse';
+    if (lower.includes('boxeo')) return 'boxing-glove';
+    if (lower.includes('crossfit')) return 'weight-lifter';
+    if (lower.includes('estiramiento')) return 'run-fast';
+    // Default
+    return 'account-group';
+  };
+
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -97,11 +114,15 @@ const ClassesSection: React.FC<{ reloadTrigger?: number }> = ({ reloadTrigger })
       <Text style={styles.sectionTitle}>Clases disponibles</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {clases.map((clase) => {
-
-
           return (
             <Card key={clase.id} style={styles.classCard}>
-              <Card.Cover source={require('../../assets/class-placeholder.jpg')} />
+              <View style={{ alignItems: 'center', marginTop: 15 }}>
+                <MaterialCommunityIcons
+                  name={getClassIcon(clase.name)}
+                  size={64}
+                  color="#ffa500"
+                />
+              </View>
               <Card.Content>
                 <Text variant="titleMedium" style={styles.text}>{clase.name}</Text>
                 <Text variant="bodySmall" style={styles.text}>
@@ -131,7 +152,7 @@ const styles = StyleSheet.create({
   },
   classCard: {
     width: 200,
-    height: 315,
+    height: 200, // Reducido para que la tarjeta no sea tan alta
     marginRight: 12,
     justifyContent: 'flex-start',
   },
