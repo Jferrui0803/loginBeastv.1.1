@@ -49,21 +49,19 @@ export default function QRGeneratorScreen() {
   // Calcular tiempo restante
   useEffect(() => {
     let interval: NodeJS.Timeout;
-
+    
     if (qrData?.expires_at) {
       interval = setInterval(() => {
         const now = new Date().getTime();
         const expiry = new Date(qrData.expires_at).getTime();
-        const difference = expiry - now; if (difference > 0) {
-          const hours = Math.floor(difference / (1000 * 60 * 60));
-          const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        const difference = expiry - now;
 
-          if (hours > 0) {
-            setTimeRemaining(`${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-          } else {
-            setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-          }
+        if (difference > 0) {
+          // Cambiar a 15 minutos máximo
+          const totalSeconds = Math.floor(difference / 1000);
+          const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+          const seconds = totalSeconds % 60;
+          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
         } else {
           setTimeRemaining('Expirado');
           setQrData(null);
@@ -194,7 +192,7 @@ export default function QRGeneratorScreen() {
           <Text style={styles.instructionsText}>
             {'1. Presenta este código QR en la entrada del gimnasio\n'}
             {'2. El personal escaneará el código para validar tu acceso\n'}
-            {`3. El código expira en ${QR_EXPIRY_HOURS} horas y es de un solo uso\n`}
+            {'3. El código expira en 15 minutos y es de un solo uso\n'}
             {'4. Genera un nuevo código si necesitas acceder nuevamente'}
           </Text>
         </Card.Content>
@@ -208,8 +206,8 @@ export default function QRGeneratorScreen() {
         <View style={styles.generateHeader}>
           <Text style={styles.generateTitle}>Acceso al gimnasio</Text>
           <Icon name="dumbbell" size={24} color="#ffa500" />
-        </View>        <Text style={styles.generateDescription}>
-          Genera un código QR para acceder al gimnasio. El código es válido por {QR_EXPIRY_HOURS} horas
+        </View><Text style={styles.generateDescription}>
+          Genera un código QR para acceder al gimnasio. El código es válido por 15 minutos
           y solo puede ser usado una vez.
         </Text>
         <Button

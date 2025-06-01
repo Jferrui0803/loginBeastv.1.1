@@ -7,7 +7,7 @@ export const QR_SERVICE_URL = process.env.EXPO_PUBLIC_QR_SERVICE_URL || 'http://
 
 // Configuraciones de tiempo y funcionalidad
 export const DEFAULT_TIMEOUT = 10000; // 10 segundos
-export const QR_EXPIRY_HOURS = Number(process.env.EXPO_PUBLIC_QR_EXPIRY_HOURS) || 2; // Horas de expiración del QR
+export const QR_EXPIRY_HOURS = 0.25; // Horas de expiración del QR (15 minutos)
 export const QR_EXPIRY_TIME = QR_EXPIRY_HOURS * 60 * 60 * 1000; // En millisegundos
 export const QR_SIZE_FACTOR = 0.6; // Factor de tamaño del QR respecto al ancho de pantalla
 
