@@ -19,16 +19,38 @@ type RootStackParamList = {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const exerciseImages = [
-  require('../../assets/sentadilla.jpg'),
-  require('../../assets/press-banca.jpg'),
-  require('../../assets/peso-muerto.jpg'),
-  require('../../assets/dominada.jpg'),
-  require('../../assets/fondos.jpg'),
-  require('../../assets/remo.jpg'),
-  require('../../assets/press-militar.png'),
-  require('../../assets/plancha.jpg'),
-  
-  
+  require('../../assets/sentadilla.jpg'), // 0
+  require('../../assets/press-banca.jpg'), // 1
+  require('../../assets/peso-muerto.jpg'), // 2
+  require('../../assets/dominada.jpg'), // 3
+  require('../../assets/fondos.jpg'), // 4
+  require('../../assets/remo.jpg'), // 5
+  require('../../assets/press-militar.png'), // 6
+  require('../../assets/plancha.jpg'), // 7
+];
+
+const pplExerciseImages = [
+  require('../../assets/press-inclinado.jpg'), 
+  require('../../assets/press-hombro.jpg'), 
+  require('../../assets/fondos-banco.jpg'), 
+  require('../../assets/aperturas.jpg'), 
+  require('../../assets/jalon.jpg'), 
+  require('../../assets/remo-maquina.jpg'), 
+  require('../../assets/face-pul.jpg'), 
+  require('../../assets/curl-martillo.jpg'), 
+  require('../../assets/prensa.jpg'), 
+  require('../../assets/zancadas-mancuernas.jpg'), 
+  require('../../assets/extension-cuadriceps.jpg'), 
+  require('../../assets/curl-femoral-tumbado.jpg'), 
+];
+
+const cardioExerciseImages = [
+  require('../../assets/correr-cinta.jpg'), 
+  require('../../assets/bicicleta-estatica.png'), 
+  require('../../assets/escaladora.png'), 
+  require('../../assets/burpees.jpg'), 
+  require('../../assets/jumping-jack.png'), 
+  require('../../assets/mountain-climber.jpg'), 
 ];
 
 export default function RoutinesScreen() {
@@ -64,8 +86,16 @@ export default function RoutinesScreen() {
 
   // Estado para mostrar el modal de ejercicios Full Body
   const [showFullBodyModal, setShowFullBodyModal] = useState(false);
+  // Estado para mostrar el modal de ejercicios Push/Pull/Legs
+  const [showPPLModal, setShowPPLModal] = useState(false);
+  // Estado para mostrar el modal de ejercicios Cardio Intenso
+  const [showCardioModal, setShowCardioModal] = useState(false);
   // Estado para el modal de información de ejercicio
   const [infoVisible, setInfoVisible] = useState<number | null>(null);
+  // Estado para el modal de información de ejercicio de PPL
+  const [infoVisiblePPL, setInfoVisiblePPL] = useState<number | null>(null);
+  // Estado para el modal de información de ejercicio de Cardio
+  const [infoVisibleCardio, setInfoVisibleCardio] = useState<number | null>(null);
 
   const weeklyStats = [
     { icon: 'fire', value: '2,450', label: 'Calorías quemadas', color: '#ffa500' },
@@ -169,6 +199,35 @@ export default function RoutinesScreen() {
     },
   ];
 
+  // Lista de ejercicios Push/Pull/Legs (12 ejercicios, sin repetir los de Full Body)
+  const pplExercises = [
+    // Push
+    { name: 'Press inclinado con mancuernas', sets: '4', reps: '10', rest: '90s', icon: 'dumbbell', muscles: 'Pecho superior, Hombros' },
+    { name: 'Press de hombro con mancuernas', sets: '3', reps: '10', rest: '90s', icon: 'arm-flex-outline', muscles: 'Hombros, Tríceps' },
+    { name: 'Fondos en banco', sets: '3', reps: '12', rest: '90s', icon: 'human-handsup', muscles: 'Tríceps, Pecho' },
+    { name: 'Aperturas con mancuernas', sets: '3', reps: '15', rest: '60s', icon: 'arrow-up-bold', muscles: 'Pecho' },
+    // Pull
+    { name: 'Jalón al pecho', sets: '4', reps: '10', rest: '90s', icon: 'arrow-down-bold', muscles: 'Espalda, Bíceps' },
+    { name: 'Remo en máquina', sets: '4', reps: '10', rest: '90s', icon: 'dumbbell', muscles: 'Espalda, Bíceps' },
+    { name: 'Face Pull', sets: '3', reps: '15', rest: '60s', icon: 'arrow-expand-horizontal', muscles: 'Espalda, Hombros' },
+    { name: 'Curl martillo', sets: '3', reps: '12', rest: '60s', icon: 'arm-flex', muscles: 'Bíceps, Antebrazo' },
+    // Legs
+    { name: 'Prensa de Piernas', sets: '4', reps: '12', rest: '120s', icon: 'arrow-down-bold', muscles: 'Piernas' },
+    { name: 'Zancadas con mancuernas', sets: '3', reps: '12', rest: '90s', icon: 'run', muscles: 'Piernas, Glúteos' },
+    { name: 'Extensión de cuádriceps', sets: '3', reps: '15', rest: '60s', icon: 'arrow-up-bold', muscles: 'Cuádriceps' },
+    { name: 'Curl femoral tumbado', sets: '3', reps: '15', rest: '60s', icon: 'arrow-down-bold', muscles: 'Isquiotibiales' },
+  ];
+
+  // Lista de ejercicios Cardio Intenso (6 ejercicios, diferentes a las otras rutinas)
+  const cardioExercises = [
+    { name: 'Correr en cinta', sets: '1', reps: '15 min', rest: '0s', icon: 'run', muscles: 'Piernas, Cardio' },
+    { name: 'Bicicleta estática', sets: '1', reps: '10 min', rest: '0s', icon: 'bike', muscles: 'Piernas, Cardio' },
+    { name: 'Escaladora', sets: '1', reps: '8 min', rest: '0s', icon: 'stairs', muscles: 'Piernas, Glúteos, Cardio' },
+    { name: 'Burpees', sets: '3', reps: '20', rest: '60s', icon: 'run-fast', muscles: 'Full Body, Cardio' },
+    { name: 'Jumping Jacks', sets: '3', reps: '30', rest: '45s', icon: 'run', muscles: 'Full Body, Cardio' },
+    { name: 'Mountain Climbers', sets: '3', reps: '40', rest: '45s', icon: 'run', muscles: 'Core, Cardio' },
+  ];
+
   // Efecto para el contador
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -227,6 +286,17 @@ export default function RoutinesScreen() {
     setTimeLeft(180);
     setIsActive(false);
     setActiveRoutineIndex(null);
+  };
+
+  const cancelarRutina = () => {
+    Alert.alert(
+      '¿Estás seguro que quieres cancelar tu rutina actual?',
+      '',
+      [
+        { text: 'No', style: 'cancel' },
+        { text: 'Sí', style: 'destructive', onPress: resetTimer }
+      ]
+    );
   };
 
   const cerrarTimer = () => {
@@ -360,7 +430,7 @@ export default function RoutinesScreen() {
                     <Text style={styles.workoutDetailText}>{plan.exercises}</Text>
                   </View>
                 </View>
-                {/* Botón para ver ejercicios solo en la rutina Full Body */}
+                {/* Botón para ver ejercicios solo en la rutina Full Body, Push/Pull/Legs y Cardio Intenso */}
                 {index === 0 && (
                   <Button
                     mode="outlined"
@@ -372,12 +442,37 @@ export default function RoutinesScreen() {
                     VER EJERCICIOS
                   </Button>
                 )}
+                {index === 1 && (
+                  <Button
+                    mode="outlined"
+                    style={{ marginTop: 8, borderColor: '#ffa500' }}
+                    labelStyle={{ color: '#ffa500', fontWeight: '700' }}
+                    icon={() => <Icon name="format-list-bulleted" size={16} color="#ffa500" />}
+                    onPress={() => setShowPPLModal(true)}
+                  >
+                    VER EJERCICIOS
+                  </Button>
+                )}
+                {index === 2 && (
+                  <Button
+                    mode="outlined"
+                    style={{ marginTop: 8, borderColor: '#ffa500' }}
+                    labelStyle={{ color: '#ffa500', fontWeight: '700' }}
+                    icon={() => <Icon name="format-list-bulleted" size={16} color="#ffa500" />}
+                    onPress={() => setShowCardioModal(true)}
+                  >
+                    VER EJERCICIOS
+                  </Button>
+                )}
                 {(isActive || timeLeft < 180) && activeRoutineIndex === index && (
                   <View style={styles.timerInfo}>
                     <Icon name="clock-outline" size={18} color="#ffa500" />
                     <Text style={styles.timerInfoText}>
                       Tiempo restante: {formatTime(timeLeft)}
                     </Text>
+                    <TouchableOpacity onPress={() => setShowTimer(true)} style={{ marginLeft: 55 }}>
+                      <Text style={{ color: '#ffa500', fontWeight: '700', textDecorationLine: 'underline' }}>Detalles</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
               </Card.Content>
@@ -399,6 +494,18 @@ export default function RoutinesScreen() {
                    activeRoutineIndex === index && timeLeft < 180 ? 'CONTINUAR' : 
                    'INICIAR RUTINA'}
                 </Button>
+                {/* Mostrar botón CANCELAR solo si la rutina está activa o pausada */}
+                {(activeRoutineIndex === index && (isActive || timeLeft < 180)) && (
+                  <Button
+                    mode="contained"
+                    onPress={cancelarRutina}
+                    style={[styles.startButton, { backgroundColor: '#F44336', marginLeft: 8 }]}
+                    labelStyle={[{ color: '#fff', fontWeight: '700' }]}
+                    icon={() => <Icon name="close" size={16} color="#fff" />}
+                  >
+                    CANCELAR
+                  </Button>
+                )}
               </Card.Actions>
             </Card>
           ))}
@@ -475,6 +582,175 @@ export default function RoutinesScreen() {
                       <View style={{ width: 260, height: 260, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
                         <Image
                           source={exerciseImages[infoVisible]}
+                          style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )}
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </Portal>
+
+        {/* Modal ejercicios Push/Pull/Legs */}
+        <Portal>
+          <Modal
+            visible={showPPLModal}
+            onDismiss={() => setShowPPLModal(false)}
+            contentContainerStyle={{ margin: 21, backgroundColor: '#fff', borderRadius: 12, padding: 18, maxHeight: '100%', justifyContent: 'center' }}
+          >
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }} showsVerticalScrollIndicator={false}>
+              <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#1A1A1A', textAlign: 'center' }}>
+                Ejercicios Push/Pull/Legs
+              </Text>
+              {pplExercises.map((exercise, idx) => (
+                <View key={idx} style={{ marginBottom: idx < pplExercises.length - 1 ? 18 : 0 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <View style={{ width: 40, height: 40, backgroundColor: 'rgba(255,165,0,0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                      <Icon name={exercise.icon} size={22} color="#ffa500" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.name}</Text>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500' }}>{exercise.muscles}</Text>
+                    </View>
+                    <IconButton icon="information-outline" size={22} iconColor="#ffa500" style={{ marginLeft: 8, padding: 4 }} onPress={() => setInfoVisiblePPL(idx)} />
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 52 }}>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Series</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.sets}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Reps</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.reps}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Descanso</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.rest}</Text>
+                    </View>
+                  </View>
+                  {idx < pplExercises.length - 1 && (
+                    <View style={{ height: 1, backgroundColor: '#E0E0E0', marginTop: 12, marginHorizontal: -16 }} />
+                  )}
+                </View>
+              ))}
+              <Button
+                mode="contained"
+                style={{ backgroundColor: '#ffa500', marginTop: 24 }}
+                labelStyle={{ color: '#000', fontWeight: '700' }}
+                icon={() => <Icon name="close" size={18} color="#000" />}
+                onPress={() => setShowPPLModal(false)}
+              >
+                CERRAR
+              </Button>
+            </ScrollView>
+          </Modal>
+
+          {/* Modal de información de ejercicio PPL: solo visible si infoVisiblePPL !== null */}
+          <Modal
+            visible={infoVisiblePPL !== null}
+            onDismiss={() => setInfoVisiblePPL(null)}
+            dismissable={true}
+            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', minHeight: '100%', backgroundColor: 'transparent', padding: 0 }}
+          >
+            <TouchableWithoutFeedback onPress={() => setInfoVisiblePPL(null)}>
+              <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableWithoutFeedback onPress={() => {}}>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', maxWidth: 320, maxHeight: 380, width: '90%', justifyContent: 'center', elevation: 8, overflow: 'hidden' }}>
+                    <TouchableOpacity style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} onPress={() => setInfoVisiblePPL(null)}>
+                      <Icon name="close" size={28} color="#ffa500" />
+                    </TouchableOpacity>
+                    {infoVisiblePPL !== null && (
+                      <View style={{ width: 260, height: 260, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                        {/* Mostrar imagen específica de PPL */}
+                        <Image
+                          source={pplExerciseImages[infoVisiblePPL]}
+                          style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    )}
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </Portal>
+
+        {/* Modal ejercicios Cardio Intenso */}
+        <Portal>
+          <Modal
+            visible={showCardioModal}
+            onDismiss={() => setShowCardioModal(false)}
+            contentContainerStyle={{ margin: 21, backgroundColor: '#fff', borderRadius: 12, padding: 18, maxHeight: '100%', justifyContent: 'center' }}
+          >
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }} showsVerticalScrollIndicator={false}>
+              <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 16, color: '#1A1A1A', textAlign: 'center' }}>
+                Ejercicios Cardio Intenso
+              </Text>
+              {cardioExercises.map((exercise, idx) => (
+                <View key={idx} style={{ marginBottom: idx < cardioExercises.length - 1 ? 18 : 0 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                    <View style={{ width: 40, height: 40, backgroundColor: 'rgba(255,165,0,0.1)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                      <Icon name={exercise.icon} size={22} color="#ffa500" />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.name}</Text>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500' }}>{exercise.muscles}</Text>
+                    </View>
+                    <IconButton icon="information-outline" size={22} iconColor="#ffa500" style={{ marginLeft: 8, padding: 4 }} onPress={() => setInfoVisibleCardio(idx)} />
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingLeft: 52 }}>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Series</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.sets}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Reps</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.reps}</Text>
+                    </View>
+                    <View style={{ alignItems: 'center', flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: '#666', fontWeight: '500', marginBottom: 2 }}>Descanso</Text>
+                      <Text style={{ fontSize: 16, fontWeight: '700', color: '#1A1A1A' }}>{exercise.rest}</Text>
+                    </View>
+                  </View>
+                  {idx < cardioExercises.length - 1 && (
+                    <View style={{ height: 1, backgroundColor: '#E0E0E0', marginTop: 12, marginHorizontal: -16 }} />
+                  )}
+                </View>
+              ))}
+              <Button
+                mode="contained"
+                style={{ backgroundColor: '#ffa500', marginTop: 24 }}
+                labelStyle={{ color: '#000', fontWeight: '700' }}
+                icon={() => <Icon name="close" size={18} color="#000" />}
+                onPress={() => setShowCardioModal(false)}
+              >
+                CERRAR
+              </Button>
+            </ScrollView>
+          </Modal>
+
+          {/* Modal de información de ejercicio Cardio: solo visible si infoVisibleCardio !== null */}
+          <Modal
+            visible={infoVisibleCardio !== null}
+            onDismiss={() => setInfoVisibleCardio(null)}
+            dismissable={true}
+            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', minHeight: '100%', backgroundColor: 'transparent', padding: 0 }}
+          >
+            <TouchableWithoutFeedback onPress={() => setInfoVisibleCardio(null)}>
+              <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                <TouchableWithoutFeedback onPress={() => {}}>
+                  <View style={{ backgroundColor: '#fff', borderRadius: 16, padding: 16, alignItems: 'center', maxWidth: 320, maxHeight: 380, width: '90%', justifyContent: 'center', elevation: 8, overflow: 'hidden' }}>
+                    <TouchableOpacity style={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }} onPress={() => setInfoVisibleCardio(null)}>
+                      <Icon name="close" size={28} color="#ffa500" />
+                    </TouchableOpacity>
+                    {infoVisibleCardio !== null && (
+                      <View style={{ width: 260, height: 260, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' }}>
+                        <Image
+                          source={cardioExerciseImages[infoVisibleCardio]}
                           style={{ width: '100%', height: '100%', borderRadius: 8 }}
                           resizeMode="contain"
                         />
@@ -655,6 +931,17 @@ export default function RoutinesScreen() {
               >
                 {isActive ? 'PAUSAR' : 'CONTINUAR'}
               </Button>
+              {(isActive || (!isActive && timeLeft < 180)) && (
+                <Button
+                  mode="outlined"
+                  onPress={cancelarRutina}
+                  style={[styles.timerActionButton, { borderColor: '#F44336', marginLeft: 8 }]}
+                  labelStyle={[{ color: '#F44336', fontWeight: '700' }]}
+                  icon={() => <Icon name="close" size={16} color="#F44336" />}
+                >
+                  CANCELAR
+                </Button>
+              )}
             </Card.Actions>
           </Card>
         </Modal>
@@ -772,38 +1059,6 @@ export default function RoutinesScreen() {
           </TouchableWithoutFeedback>
         </Modal>
       </Portal>
-
-      {/* Bottom Navigation - Sin el ícono de perfil aquí */}
-      <View style={styles.bottomBar}>
-        <IconButton
-          icon="home"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('HomeScreen')}
-        />
-        <IconButton
-          icon="calendar"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ClassBooking')}
-        />
-        <IconButton
-          icon="chart-line"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => {}}
-        />
-        <IconButton
-          icon="dumbbell"
-          size={28}
-          iconColor="#FFFFFF" // Activo porque estamos en RoutinesScreen
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('Routines')}
-        />
-      </View>
     </View>
   );
 }
@@ -1398,25 +1653,5 @@ const styles = StyleSheet.create({
     fontSize: 12, 
     fontWeight: '700',
     color: '#000000',
-  },
-
-  // Bottom Bar - Estilo idéntico a otras pantallas (sin perfil)
-  bottomBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 70,
-    backgroundColor: '#1A1A1A',
-    borderRadius: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  bottomBarButton: {
-    margin: 0,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react'; // Agregué useLayoutEffect
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Share } from 'react-native';
 import { Surface, SegmentedButtons, Card, DataTable, Button, List, Divider, ProgressBar, Portal, Modal, IconButton } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -144,8 +144,15 @@ export default function ProgressScreen() {
   const currentPersonalRecords = getPersonalRecordsForPeriod(timeRange);
   const currentAchievements = getAchievementsForPeriod(timeRange);
 
-  const onShareProgress = () => {
-    alert('Función de compartir progreso aún no implementada.');
+  const onShareProgress = async () => {
+    try {
+      const message = `¡Mira mi progreso en el gym!\n\n${currentStats.periodLabel}:\n- Entrenamientos: ${currentStats.totalWorkouts}\n- Calorías: ${currentStats.totalCalories}\n- Tiempo total: ${currentStats.totalHours}h\n- Racha: ${currentStats.streak} días\n\nSiguiente meta: ${currentStats.nextGoal}`;
+      await Share.share({
+        message,
+      });
+    } catch (error) {
+      alert('No se pudo compartir el progreso.');
+    }
   };
 
   return (
@@ -361,38 +368,6 @@ export default function ProgressScreen() {
           </Card>
         </View>
       </ScrollView>
-
-      {/* Bottom Navigation - Estilo idéntico a otras pantallas */}
-      <View style={styles.bottomBar}>
-        <IconButton
-          icon="home"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('HomeScreen')}
-        />
-        <IconButton
-          icon="calendar"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ClassBooking')}
-        />
-        <IconButton
-          icon="chart-line"
-          size={28}
-          iconColor="#FFFFFF"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ProgressScreen')}
-        />
-        <IconButton
-          icon="dumbbell"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('Routines')}
-        />
-      </View>
     </View>
   );
 }
@@ -719,25 +694,5 @@ const styles = StyleSheet.create({
   divider: {
     backgroundColor: '#E0E0E0',
     marginVertical: 8,
-  },
-
-  // Bottom Bar - Estilo idéntico a otras pantallas
-  bottomBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 70,
-    backgroundColor: '#1A1A1A',
-    borderRadius: 0, 
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    paddingHorizontal: 20,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  bottomBarButton: {
-    margin: 0,
   },
 });

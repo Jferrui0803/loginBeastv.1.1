@@ -206,38 +206,6 @@ export default function ClassBookingScreen() {
           )}
         </View>
       </ScrollView>
-
-      {/* Bottom Navigation - SIN el ícono de perfil aquí */}
-      <View style={styles.bottomBar}>
-        <IconButton
-          icon="home"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('HomeScreen')}
-        />
-        <IconButton
-          icon="calendar"
-          size={28}
-          iconColor="#FFFFFF"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ClassBooking')}
-        />
-        <IconButton
-          icon="chart-line"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('ProgressScreen')}
-        />
-        <IconButton
-          icon="dumbbell"
-          size={28}
-          iconColor="rgba(255, 255, 255, 0.7)"
-          style={styles.bottomBarButton}
-          onPress={() => navigation.navigate('Routines')}
-        />
-      </View>
     </View>
   );
 }

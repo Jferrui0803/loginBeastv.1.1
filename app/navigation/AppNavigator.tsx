@@ -26,6 +26,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { IconButton } from 'react-native-paper';
+import MainTabNavigator from './MainTabNavigator';
 
 // Definir los parámetros de navegación del stack principal
 type MainStackParamList = {
@@ -46,6 +47,7 @@ type MainStackParamList = {
   IAChatList: { chatType: 'nutrition' | 'training' };
   IAChatDetail: { chatId: string; chatTitle: string; chatType: 'nutrition' | 'training' };
   EditProfile: { user: { id: string; name: string; email: string; phone: string } };
+  MainTabs: undefined;
 };
 
 export type { MainStackParamList };
@@ -61,6 +63,7 @@ const AppNavigator = () => {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={({ navigation }) => ({
+          headerBackTitle: 'Back',
           headerRight: () => (
             <IconButton
               icon="account-circle"
@@ -76,27 +79,12 @@ const AppNavigator = () => {
         {authState?.authenticated ? (
           <>
             <Stack.Screen
-              name="HomeScreen"
-              component={HomeScreen}
-              options={{
-                headerRight: () => (
-                  <View style={styles.headerButtonContainer}>
-                    <Button onPress={onLogout} title="Sign Out" />
-                  </View>
-                ),
-                headerShown: true,
-                title: 'Inicio',
-                headerStyle: {
-                  backgroundColor: '#1A1A1A'
-                },
-                headerTitleStyle: {
-                  fontWeight: '700',
-                  fontSize: 20,
-                  color: '#fff',
-                },
-                headerTintColor: '#fff',
-              }}
+              name="MainTabs"
+              component={MainTabNavigator}
+              options={{ headerShown: false }}
             />
+            {/* Pantallas secundarias fuera de tabs */}
+            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen 
               name="ChatList" 
               component={ChatListScreen} 
@@ -199,7 +187,6 @@ const AppNavigator = () => {
                 headerTintColor: '#fff',
               }}
             />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen
               name="Routines"
               component={RoutinesScreen}

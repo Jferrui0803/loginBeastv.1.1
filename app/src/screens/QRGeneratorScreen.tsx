@@ -62,6 +62,16 @@ export default function QRGeneratorScreen() {
           } else {
             setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
           }
+=======
+        const difference = expiry - now;
+
+        if (difference > 0) {
+          // Cambiar a 15 minutos máximo
+          const totalSeconds = Math.floor(difference / 1000);
+          const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+          const seconds = totalSeconds % 60;
+          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+>>>>>>> 54a3fb11907025c16f5f513c8951b89d476250d8
         } else {
           setTimeRemaining('Expirado');
           setQrData(null);
@@ -73,6 +83,32 @@ export default function QRGeneratorScreen() {
       if (interval) clearInterval(interval);
     };
   }, [qrData]);
+  // Cargar QR guardado al entrar
+  useEffect(() => {
+    const loadStoredQR = async () => {
+      const storedQR = await AsyncStorage.getItem('qrData');
+      if (storedQR) {
+        const parsed = JSON.parse(storedQR);
+        // Solo restaurar si no ha expirado
+        if (parsed.expires_at && new Date(parsed.expires_at).getTime() > Date.now()) {
+          setQrData(parsed);
+        } else {
+          await AsyncStorage.removeItem('qrData');
+        }
+      }
+    };
+    loadStoredQR();
+  }, []);
+
+  // Guardar QR en storage cada vez que cambia
+  useEffect(() => {
+    if (qrData) {
+      AsyncStorage.setItem('qrData', JSON.stringify(qrData));
+    } else {
+      AsyncStorage.removeItem('qrData');
+    }
+  }, [qrData]);
+
   const generateQR = async () => {
     setLoading(true);
     setError(null);
@@ -107,6 +143,7 @@ export default function QRGeneratorScreen() {
       );
 
       setQrData(response.data);
+      await AsyncStorage.setItem('qrData', JSON.stringify(response.data));
     } catch (err: any) {
       console.error('Error generando QR:', err);
       let errorMessage = 'Error al generar el código QR';
@@ -226,11 +263,12 @@ export default function QRGeneratorScreen() {
           </View>
         </View>
 
-        {qrData ? renderQRSection() : renderGenerateSection()}        {qrData && (
+        {qrData ? renderQRSection() : renderGenerateSection()}
+        {qrData && (
           <Button
-            mode="outlined"
-            style={styles.newQRButton}
-            labelStyle={styles.newQRButtonText}
+            mode="contained"
+            style={[styles.newQRButton, { backgroundColor: '#ffa500', borderColor: '#ffa500' }]}
+            labelStyle={[styles.newQRButtonText, { color: '#fff' }]}
             icon="refresh"
             onPress={generateQR}
             disabled={loading}
