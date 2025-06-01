@@ -11,6 +11,7 @@ import { API_URL } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { jwtDecode } from 'jwt-decode';
 
+import { useCameraPermissions } from 'expo-camera';
 import HomeClassCard from '../components/HomeClassCard';
 
 const { width } = Dimensions.get('window');
@@ -41,6 +42,8 @@ export default function HomeScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
     const [userRole, setUserRole] = useState<'USER' | 'ADMIN' | 'TRAINER' | null>(null);
+    const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+    const isPermissionGranted = cameraPermission?.granted || false;
 
     const getUserRole = async () => {
         try {
@@ -172,7 +175,8 @@ export default function HomeScreen() {
                     labelStyle={styles.startButtonText}
                     icon={() => <Icon name="play" size={16} color="#FFFFFF" />}
                     onPress={() => navigation.navigate('WorkoutDetail')}>
-                    COMENZAR
+                    
+                    <Text>COMENZAR</Text>
                 </Button>
             </Card.Actions>
         </Card>
@@ -187,7 +191,8 @@ export default function HomeScreen() {
                     labelStyle={styles.quickActionLabel}
                 // onPress={() => navigation.navigate('ClassBooking')}
                 >
-                    Clases
+                    
+                    <Text>Clases</Text>
                 </Button>
                 <Button
                     mode="outlined"
@@ -196,7 +201,8 @@ export default function HomeScreen() {
                     labelStyle={styles.quickActionLabel}
                 // onPress={() => navigation.navigate('ProgressScreen')}
                 >
-                    Progreso
+                    
+                    <Text>Progreso</Text>
                 </Button>
                 <Button
                     mode="outlined"
@@ -205,7 +211,8 @@ export default function HomeScreen() {
                     labelStyle={styles.quickActionLabel}
                 // onPress={() => navigation.navigate('Routines')}
                 >
-                    Rutinas
+                    
+                    <Text>Rutinas</Text>
                 </Button>
             </View>
             <View style={[styles.quickActionsGrid, { marginTop: 16 }]}>
@@ -215,7 +222,8 @@ export default function HomeScreen() {
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
                     onPress={() => navigation.navigate('QRGenerator')}>
-                    Acceso QR
+                    
+                    <Text>Acceso QR</Text>
                 </Button>
                 <Button
                     mode="outlined"
@@ -223,7 +231,8 @@ export default function HomeScreen() {
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
                     onPress={() => handleNewIAChat('nutrition')}>
-                    Chat Nutrición
+                    
+                   <Text>Chat Nutrición</Text>
                 </Button>
                 <Button
                     mode="outlined"
@@ -231,7 +240,8 @@ export default function HomeScreen() {
                     style={styles.quickActionButton}
                     labelStyle={styles.quickActionLabel}
                     onPress={() => handleNewIAChat('training')}>
-                    Chat Entrenamiento
+                    
+                    <Text>Chat Entrenamiento</Text>
                 </Button>
             </View>
         </View>
@@ -243,8 +253,16 @@ export default function HomeScreen() {
             icon={() => <Icon name="qrcode-scan" size={24} color="#ffa500" />}
             style={styles.scannerButton}
             labelStyle={styles.quickActionLabel}
-            onPress={() => navigation.navigate('ScannerScreen')}>
-            Escanear QR
+            onPress={ async () => {
+                const permission = await requestCameraPermission();
+
+                if (permission.granted) {
+                    navigation.navigate('ScannerScreen'); // <-- asegúrate que exista
+                } else {
+                    alert('Permiso de cámara denegado. No puedes escanear el código QR.');
+                }
+            }}>
+            <Text>Escanear QR</Text> 
         </Button>
     );
     const renderWeeklyStats = () => (
