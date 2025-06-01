@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import QRCode from 'react-native-qrcode-svg';
 import { jwtDecode } from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { QR_SERVICE_URL, QR_SIZE_FACTOR, QR_EXPIRY_HOURS } from '../../config/config';
 
 const { width } = Dimensions.get('window');
 
@@ -115,12 +116,10 @@ export default function QRGeneratorScreen() {
 
       if (!userGymId) {
         throw new Error('gymId no encontrado en el token');
-      }
-
-      // URL del servicio QR de Python
-      const QR_SERVICE_URL = 'http://192.168.1.78:8000'; // Servicio QR corriendo en Docker
+      }      // URL del servicio QR de Python (desde configuración centralizada)
       console.log('Generando QR para el gimnasio:', userGymId);
       console.log('Token de autenticación:', token);
+      console.log('QR Service URL:', QR_SERVICE_URL);
       const response = await axios.post(
         `${QR_SERVICE_URL}/generate-qr`,
 
@@ -164,11 +163,10 @@ export default function QRGeneratorScreen() {
             <Text style={styles.qrTitle}>Tu código QR</Text>
             <Icon name="qrcode" size={24} color="#ffa500" />
           </View>
-          <View style={styles.qrContainer}>
-            {qrData.qr_code ? (
+          <View style={styles.qrContainer}>{qrData.qr_code ? (
               <QRCode
                 value={qrData.qr_token}
-                size={width * 0.6}
+                size={width * QR_SIZE_FACTOR}
                 backgroundColor="white"
                 color="black"
               />
@@ -192,11 +190,11 @@ export default function QRGeneratorScreen() {
           </View>
           <Divider style={styles.divider} />
 
-          <Text style={styles.instructionsTitle}>Instrucciones:</Text>
+          <Text style={styles.instructionsTitle}>Instrucciones:</Text>          
           <Text style={styles.instructionsText}>
             {'1. Presenta este código QR en la entrada del gimnasio\n'}
             {'2. El personal escaneará el código para validar tu acceso\n'}
-            {'3. El código expira en 2 horas y es de un solo uso\n'}
+            {`3. El código expira en ${QR_EXPIRY_HOURS} horas y es de un solo uso\n`}
             {'4. Genera un nuevo código si necesitas acceder nuevamente'}
           </Text>
         </Card.Content>
@@ -210,9 +208,8 @@ export default function QRGeneratorScreen() {
         <View style={styles.generateHeader}>
           <Text style={styles.generateTitle}>Acceso al gimnasio</Text>
           <Icon name="dumbbell" size={24} color="#ffa500" />
-        </View>
-        <Text style={styles.generateDescription}>
-          Genera un código QR para acceder al gimnasio. El código es válido por 2 horas
+        </View>        <Text style={styles.generateDescription}>
+          Genera un código QR para acceder al gimnasio. El código es válido por {QR_EXPIRY_HOURS} horas
           y solo puede ser usado una vez.
         </Text>
         <Button

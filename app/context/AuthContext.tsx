@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { jwtDecode } from 'jwt-decode';
+import { API_URL } from '../config/config';
 
 
 interface AuthProps {
@@ -13,7 +14,7 @@ interface AuthProps {
 }
 
 const TOKEN_KEY = 'userToken';
-export const API_URL = 'http://192.168.1.33:3000';
+export { API_URL };
 const AuthContext = createContext<AuthProps>({});
 
 export const useAuth = () => {
