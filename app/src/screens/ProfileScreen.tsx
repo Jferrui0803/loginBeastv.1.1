@@ -357,7 +357,11 @@ export default function ProfileScreen() {
                 style={styles.secondaryButton}
                 labelStyle={styles.secondaryButtonText}
                 icon={() => <Icon name="lock-reset" size={16} color="#666666" />}
-                onPress={() => console.log('Cambiar contraseña')}
+               onPress={() => {
+                  if (user) {
+                    navigation.navigate('ChangePasswordScreen', { user });
+                  }
+                }}
               >
                 CAMBIAR CONTRASEÑA
               </Button>
