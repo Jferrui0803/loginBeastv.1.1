@@ -53,7 +53,6 @@ export default function QRGeneratorScreen() {
       interval = setInterval(() => {
         const now = new Date().getTime();
         const expiry = new Date(qrData.expires_at).getTime();
-<<<<<<< HEAD
         const difference = expiry - now; if (difference > 0) {
           const hours = Math.floor(difference / (1000 * 60 * 60));
           const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
@@ -64,16 +63,6 @@ export default function QRGeneratorScreen() {
           } else {
             setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
           }
-=======
-        const difference = expiry - now;
-
-        if (difference > 0) {
-          // Cambiar a 15 minutos máximo
-          const totalSeconds = Math.floor(difference / 1000);
-          const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-          const seconds = totalSeconds % 60;
-          setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`);
->>>>>>> 54a3fb11907025c16f5f513c8951b89d476250d8
         } else {
           setTimeRemaining('Expirado');
           setQrData(null);
