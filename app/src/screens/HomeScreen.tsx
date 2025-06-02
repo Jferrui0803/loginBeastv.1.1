@@ -52,7 +52,7 @@ export default function HomeScreen() {
             if (token) {
                 // Primero intentar obtener el rol del token JWT
                 try {
-                    const decoded = jwtDecode<JwtPayload>(token);
+                    const decoded = jwtDecode<any>(token);
                     if (decoded.role) {
                         setUserRole(decoded.role);
 
