@@ -36,6 +36,7 @@ export default function ClassBookingScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reserving, setReserving] = useState<string | null>(null);
+  const [clasesReservadas, setClasesReservadas] = useState<Set<string>>(new Set());
 
 
   useLayoutEffect(() => {
@@ -87,19 +88,19 @@ export default function ClassBookingScreen() {
   useEffect(() => {
     fetchClases();
   }, []);
-
   const reservarClase = async (claseId: string) => {
     try {
       setReserving(claseId);
-      const token = await SecureStore.getItemAsync('userToken');
-      await axios.post(
-        `${API_URL}/api/classes/${claseId}/reserve`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      
+      // Simular un pequeño delay para mostrar el loading
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Agregar la clase al conjunto de clases reservadas
+      setClasesReservadas(prev => new Set([...prev, claseId]));
+      
       alert('Reserva realizada con éxito');
     } catch (err: any) {
-      alert(err?.response?.data?.msg || 'Error al reservar la clase');
+      alert('Error al reservar la clase');
     } finally {
       setReserving(null);
     }
@@ -175,19 +176,30 @@ export default function ClassBookingScreen() {
                     <Text style={styles.classDetailText}>{clase.gym.name}</Text>
                   </View>
                 </View>
-              </Card.Content>
-
-              <Card.Actions style={styles.classCardActions}>
+              </Card.Content>              <Card.Actions style={styles.classCardActions}>
                 <Button
                   mode="contained"
-                  style={styles.reserveButton}
-                  labelStyle={styles.reserveButtonText}
-                  icon={() => <Icon name="calendar-check" size={16} color="#000000" />}
+                  style={[
+                    styles.reserveButton,
+                    clasesReservadas.has(clase.id) && styles.reservedButton
+                  ]}
+                  labelStyle={[
+                    styles.reserveButtonText,
+                    clasesReservadas.has(clase.id) && styles.reservedButtonText
+                  ]}
+                  icon={() => (
+                    <Icon 
+                      name={clasesReservadas.has(clase.id) ? "check-circle" : "calendar-check"} 
+                      size={16} 
+                      color={clasesReservadas.has(clase.id) ? "#FFFFFF" : "#000000"} 
+                    />
+                  )}
                   loading={reserving === clase.id}
-                  disabled={reserving === clase.id}
+                  disabled={reserving === clase.id || clasesReservadas.has(clase.id)}
                   onPress={() => reservarClase(clase.id)}
                 >
-                  {reserving === clase.id ? 'RESERVANDO...' : 'RESERVAR'}
+                  {reserving === clase.id ? 'RESERVANDO...' : 
+                   clasesReservadas.has(clase.id) ? 'RESERVADA' : 'RESERVAR'}
                 </Button>
               </Card.Actions>
             </Card>
@@ -338,12 +350,25 @@ const styles = StyleSheet.create({
     elevation: 0,
     minWidth: 120,
     alignSelf: 'flex-start',
-  },
-  reserveButtonText: {
+  },  reserveButtonText: {
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 0.5,
     color: '#000000',
+  },
+  reservedButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 0, 
+    paddingVertical: 4,
+    elevation: 0,
+    minWidth: 120,
+    alignSelf: 'flex-start',
+  },
+  reservedButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
 
   // Empty State
